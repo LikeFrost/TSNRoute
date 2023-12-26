@@ -1,7 +1,6 @@
-import java.io.UnsupportedEncodingException;
-import java.util.List;
+import GraphEntity.MyGraph;
 
-import GraphEntity.*;
+import java.io.UnsupportedEncodingException;
 
 public class Main {
     public static void main(String[] args) {
@@ -11,8 +10,7 @@ public class Main {
             e.printStackTrace();
         }
         int n = 45, e = 106;
-
-        // 9行三列数组，每一列分别为开始点、终止点、该边权值
+        //起点、终点、可靠度
         double data[][] = {{0, 13, 0.99}, {0, 14, 0.99}, {0, 15, 0.99}, {0, 4, 0.99}, {0, 5, 0.99},
                 {1, 16, 0.99}, {1, 17, 0.99}, {1, 4, 0.99}, {1, 5, 0.99},
                 {2, 18, 0.99}, {2, 19, 0.99}, {2, 20, 0.99}, {2, 21, 0.99}, {2, 22, 0.99}, {2, 4, 0.99}, {2, 5, 0.99},
@@ -43,7 +41,6 @@ public class Main {
 
         MyGraph g = new MyGraph(n, e);
         g.createMyGraph(g, n, e, data);
-//        g.DFS(g, 0);// 从0开始遍历
 
         // 调用ksp并打印最终结果
         ShortestPath ksp = new ShortestPath();

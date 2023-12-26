@@ -11,7 +11,6 @@ public class ShortestPath {
         //该条路径可靠度
         public double reliability;
 
-        // 路径上节点个数：通过path.size()得到
         public MyPath() {
         }
 
@@ -82,7 +81,7 @@ public class ShortestPath {
                 double r1 = 1;
                 for (int j = 0; j <= i - 1; j++) {
                     w1 += NavigationUtil.getEdgeWeight(g, pk.get(j), pk.get(j + 1));
-                    r1 *= 1/NavigationUtil.getEdgeWeight(g, pk.get(j), pk.get(j + 1));
+                    r1 *= NavigationUtil.getEdgeReliability(g, pk.get(j), pk.get(j + 1));
                 }
                 // 2,偏离点到终点的最短路径
                 MyPath viToDestinationSP = getSingleShortestPath_dijkstra(g, pk.get(i), endIndex, pk.subList(0, i), result);
@@ -270,7 +269,7 @@ public class ShortestPath {
         }
         while (!stack.isEmpty()) {
 //            System.out.print(g.point[stack.peek()].data + "-->");
-            result.add(g.point[stack.pop()].data);
+            result.add(g.point[stack.pop()].id);
         }
         return result;
     }

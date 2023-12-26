@@ -12,19 +12,20 @@ public class NavigationUtil {
      */
     public static double getEdgeWeight(MyGraph graph, int i, int j)
     {
-        EdgeNode a = null;
-        a=graph.point[i].firstArc;
-        while(a!=null)
-        {
-            if(a.adjvex==j)
-            {
-                return a.value;
-            }
-            a=a.nextEdge;                                                    //实际上像是一种遍历链表的行为
-        }
-        return -1;
+        return graph.graph[i][j];
     }
 
+    /**
+     * 获取两点之间可靠度
+     * @param graph
+     * @param i
+     * @param j
+     * @return
+     */
+    public static double getEdgeReliability(MyGraph graph, int i, int j)
+    {
+        return 1/graph.graph[i][j];
+    }
 
     /**
      * 判断两点是否连通
@@ -35,17 +36,7 @@ public class NavigationUtil {
      */
     public static boolean isConnected(MyGraph graph,int i,int j)
     {
-        EdgeNode a = null;
-        a=graph.point[i].firstArc;
-        while(a!=null)
-        {
-            if(a.adjvex==j)
-            {
-                return true;
-            }
-            a=a.nextEdge;                                                    //实际上像是一种遍历链表的行为
-        }
-        return false;
+        return graph.graph[i][j] < Double.MAX_VALUE;
     }
 
     /**
