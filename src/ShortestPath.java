@@ -6,6 +6,8 @@ public class ShortestPath {
     public static class MyPath {
         // 路径上的各个节点对应的数组下标（从起点到终点）
         public List<Integer> path;
+        //路径上的各个边对应的id
+        public List<Integer> pathEdge;
         // 路径总权值
         public double weight;
         //该条路径可靠度
@@ -14,8 +16,9 @@ public class ShortestPath {
         public MyPath() {
         }
 
-        public MyPath(List<Integer> path, double weight,double reliability) {
+        public MyPath(List<Integer> path,List<Integer> pathEdge, double weight,double reliability) {
             this.path = path;
+            this.pathEdge = pathEdge;
             this.weight = weight;
             this.reliability = reliability;
         }
@@ -23,6 +26,7 @@ public class ShortestPath {
         @Override
         public String toString() {
             return "path=" + path +
+                    ", pathEdge=" + pathEdge +
                     ", weight=" + weight +
                     ",reliability="+reliability+ "\n";
         }
@@ -104,7 +108,7 @@ public class ShortestPath {
                 break;
             } else {
                 // 从候选路径中选出最合适的一条，移除并加入到结果列表
-                MyPath fitPath = getFitPathFromCandidate(candidatePaths);
+                MyPath fitPath = getFitPathFromCandidate(candidatePaths,g);
                 candidatePaths.remove(fitPath);
                 result.add(fitPath);
                 k++;
@@ -115,14 +119,6 @@ public class ShortestPath {
         return result;
     }
 
-    public Map<String,Object> getRedundantPath(MyGraph g,List<MyPath> path){
-        Map<String,Object> result = new HashMap<>();
-        result.put("path",path);
-        result.put("redundantPathReliability",NavigationUtil.getRedundantPathReliability(0.5,0.5,g,path));
-        System.out.println(result);
-        return result;
-    }
-
     /**
      * 从候选列表中得到一条路径作为pk+1
      * 要求：1）该路径的权值和最小；2）路径经过节点数最少
@@ -130,8 +126,8 @@ public class ShortestPath {
      * @param candidatePaths：候选列表
      * @return
      */
-    private MyPath getFitPathFromCandidate(Set<MyPath> candidatePaths) {
-        MyPath result = new MyPath(null, Double.MAX_VALUE,1);
+    private MyPath getFitPathFromCandidate(Set<MyPath> candidatePaths,MyGraph g) {
+        MyPath result = new MyPath(null,null, Double.MAX_VALUE,1);
         for (MyPath p : candidatePaths) {
             // 对于每一条路径
             if (p.weight < result.weight) {
@@ -141,6 +137,7 @@ public class ShortestPath {
                 result = p;
             }
         }
+        result.pathEdge = getPathEdge(g,result.path);
         return result;
     }
 
@@ -248,6 +245,7 @@ public class ShortestPath {
             result.path = getMinimumPath(g, startIndex, endIndex, path);
             result.weight = dist[endIndex];
             result.reliability = NavigationUtil.getPathReliability(g,result.path);
+            result.pathEdge = getPathEdge(g,result.path);
             return result;
         }
     }
@@ -271,6 +269,30 @@ public class ShortestPath {
 //            System.out.print(g.point[stack.peek()].data + "-->");
             result.add(g.point[stack.pop()].id);
         }
+        return result;
+    }
+
+    /**
+     * 输出给定节点路径的边路径
+     *
+     * @param g
+     * @param path:节点路径
+     */
+    private List<Integer> getPathEdge(MyGraph g, List<Integer> path){
+        List<Integer> result = new ArrayList<>();
+        // s到i的最短路径上的边编号
+        for(int i = 1; i < path.size(); i++){
+            result.add(g.graph[path.get(i - 1)][path.get(i)].id % (g.numEdges/2));
+        }
+        return result;
+    }
+
+    public Map<String,Object> getRedundantPath(MyGraph g,List<MyPath> path){
+        Map<String,Object> result = new HashMap<>();
+        List<MyPath> redundantPath = new ArrayList<>();
+        result.put("path",path);
+        result.put("redundantPathReliability",NavigationUtil.getRedundantPathReliability(0.5,0.5,g,path));
+        System.out.println(result);
         return result;
     }
 

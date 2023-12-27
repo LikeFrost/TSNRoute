@@ -12,7 +12,7 @@ public class NavigationUtil {
      */
     public static double getEdgeWeight(MyGraph graph, int i, int j)
     {
-        return graph.graph[i][j];
+        return graph.graph[i][j].weight;
     }
 
     /**
@@ -24,7 +24,7 @@ public class NavigationUtil {
      */
     public static double getEdgeReliability(MyGraph graph, int i, int j)
     {
-        return 1/graph.graph[i][j];
+        return 1/graph.graph[i][j].weight;
     }
 
     /**
@@ -36,7 +36,7 @@ public class NavigationUtil {
      */
     public static boolean isConnected(MyGraph graph,int i,int j)
     {
-        return graph.graph[i][j] < Double.MAX_VALUE;
+        return graph.graph[i][j].weight < Double.MAX_VALUE;
     }
 
     /**
