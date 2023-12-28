@@ -1,24 +1,10 @@
-import javax.sql.rowset.RowSetWarning;
+package Utils;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class MinimalCutSetsFinder {
-
-    public static void main(String[] args) {
-        List<List<Integer>> paths = Arrays.asList(
-                Arrays.asList(5, 8, 26, 43, 52),
-                Arrays.asList(5, 8, 27, 46, 52),
-                Arrays.asList(5, 7, 23, 42, 43, 52)
-        );
-
-        Set<Set<Integer>> minimalCutSets = findMinimalCutSets(paths);
-        for (Set<Integer> cutSet : minimalCutSets) {
-            System.out.println("Minimal Cut Set: " + cutSet);
-        }
-    }
-
-
-    private static Set<Set<Integer>> findMinimalCutSets(List<List<Integer>> paths) {
+    public static Set<Set<Integer>> findMinimalCutSets(List<List<Integer>> paths) {
         List<Set<Integer>> pathEdges = paths.stream()
                 .map(path -> new HashSet<>(path))
                 .collect(Collectors.toList());
@@ -29,10 +15,6 @@ public class MinimalCutSetsFinder {
         return deleteSet(allCombinations.stream()
                 .filter(set -> isMinimalCutSet(set, paths))
                 .collect(Collectors.toSet()));
-    }
-    private static boolean isSubset(Set<Integer> subset, Set<Integer> set) {
-        System.out.println(subset+" "+set+subset.isEmpty());
-        return set.containsAll(subset);
     }
 
     private static void generateCombinations(List<Set<Integer>> pathEdges, int index, Set<Integer> current, Set<Set<Integer>> allCombinations) {

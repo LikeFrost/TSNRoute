@@ -1,6 +1,10 @@
 import GraphEntity.*;
+import Utils.CutSetTheorem;
+import Utils.MinimalCutSetsFinder;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class NavigationUtil {
     /**
@@ -64,11 +68,33 @@ public class NavigationUtil {
     public static double getRedundantPathReliability(double temporaryProbability, double permanentProbability, MyGraph graph, List<ShortestPath.MyPath> pathList){
         double temReliability = 1;
         double perReliability = 1;
+        
+        //瞬时故障
         for(int i = 0; i <= pathList.size()-1; i++){
             temReliability *= (1-pathList.get(i).reliability);
         }
         temReliability = 1-temReliability;
-        System.out.println(temReliability);
-        return 0;
+
+        //永久故障
+        List<List<Integer>> paths = new ArrayList<>();
+        for(ShortestPath.MyPath path : pathList){
+            paths.add(path.pathEdge);
+        }
+        Set<Set<Integer>> minimalCutSets = MinimalCutSetsFinder.findMinimalCutSets(paths);
+        List<List<Integer>> minimalCutLists = convertSetOfSetsToList(minimalCutSets);
+        perReliability = CutSetTheorem.getCombinationsReliability(minimalCutLists);
+
+        return temporaryProbability*temReliability + permanentProbability*perReliability;
+    }
+    //将set转化为list
+    private static List<List<Integer>> convertSetOfSetsToList(Set<Set<Integer>> setOfSets) {
+        List<List<Integer>> resultList = new ArrayList<>();
+
+        for (Set<Integer> set : setOfSets) {
+            List<Integer> list = new ArrayList<>(set);
+            resultList.add(list);
+        }
+
+        return resultList;
     }
 }
