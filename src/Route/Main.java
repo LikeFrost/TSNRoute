@@ -1,4 +1,6 @@
-import GraphEntity.MyGraph;
+package Route;
+
+import Route.GraphEntity.MyGraph;
 
 import java.io.UnsupportedEncodingException;
 
@@ -43,8 +45,7 @@ public class Main {
         g.createMyGraph(g, n, e, data);
 
         // 调用ksp并打印最终结果
-        ShortestPath ksp = new ShortestPath();
-        System.out.println(ksp.KSP_Yen(g, 16, 43, 3));
+        RedundantPath.getRedundantPath(g, 16, 43, 5,5,0.9999);
     }
 
 }

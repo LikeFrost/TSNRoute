@@ -1,6 +1,7 @@
-import GraphEntity.*;
-import Utils.CutSetTheorem;
-import Utils.MinimalCutSetsFinder;
+package Route.Utils;
+
+import Route.GraphEntity.*;
+import Route.ShortestPath;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +69,7 @@ public class NavigationUtil {
     public static double getRedundantPathReliability(double temporaryProbability, double permanentProbability, MyGraph graph, List<ShortestPath.MyPath> pathList){
         double temReliability = 1;
         double perReliability = 1;
-        
+
         //瞬时故障
         for(int i = 0; i <= pathList.size()-1; i++){
             temReliability *= (1-pathList.get(i).reliability);
@@ -82,7 +83,7 @@ public class NavigationUtil {
         }
         Set<Set<Integer>> minimalCutSets = MinimalCutSetsFinder.findMinimalCutSets(paths);
         List<List<Integer>> minimalCutLists = convertSetOfSetsToList(minimalCutSets);
-        perReliability = CutSetTheorem.getCombinationsReliability(minimalCutLists);
+        perReliability = CutSetTheorem.getCombinationsReliability(minimalCutLists,graph);
 
         return temporaryProbability*temReliability + permanentProbability*perReliability;
     }

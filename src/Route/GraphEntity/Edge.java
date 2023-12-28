@@ -1,4 +1,4 @@
-package GraphEntity;
+package Route.GraphEntity;
 
 public class Edge {
     public int id; //边id

@@ -1,4 +1,7 @@
-import GraphEntity.*;
+package Route;
+import Route.GraphEntity.*;
+import Route.Utils.NavigationUtil;
+
 import java.util.*;
 
 public class ShortestPath {
@@ -62,7 +65,7 @@ public class ShortestPath {
      * @param K：要求的最短路径数目
      * @return
      */
-    public List<MyPath> KSP_Yen(MyGraph g, int startIndex, int endIndex, int K) {
+    public static List<MyPath> KSP_Yen(MyGraph g, int startIndex, int endIndex, int K) {
         // 结果列表
         List<MyPath> result = new ArrayList<>();
         // 候选路径列表
@@ -115,7 +118,6 @@ public class ShortestPath {
                 pk = fitPath.path;
             }
         }
-        getRedundantPath(g,result);
         return result;
     }
 
@@ -126,7 +128,7 @@ public class ShortestPath {
      * @param candidatePaths：候选列表
      * @return
      */
-    private MyPath getFitPathFromCandidate(Set<MyPath> candidatePaths,MyGraph g) {
+    private static MyPath getFitPathFromCandidate(Set<MyPath> candidatePaths,MyGraph g) {
         MyPath result = new MyPath(null,null, Double.MAX_VALUE,1);
         for (MyPath p : candidatePaths) {
             // 对于每一条路径
@@ -151,7 +153,7 @@ public class ShortestPath {
      * @param unavailableEdges：求最短路径时不可用的边
      * @return
      */
-    public MyPath getSingleShortestPath_dijkstra(MyGraph g, int startIndex, int endIndex,
+    private static MyPath getSingleShortestPath_dijkstra(MyGraph g, int startIndex, int endIndex,
             List<Integer> unavailableNodeIndexs, List<MyPath> unavailableEdges) {
         if (startIndex == -1) {
             // throw new Exception("getSingleShortestPath_dijkstra()起始点编号输入错误");
@@ -256,7 +258,7 @@ public class ShortestPath {
      * @param sIndex：起始节点在数组中下标
      * @param tIndex：终止节点在数组中下标
      */
-    private List<Integer> getMinimumPath(MyGraph g, int sIndex, int tIndex, int[] path) {
+    private static List<Integer> getMinimumPath(MyGraph g, int sIndex, int tIndex, int[] path) {
         List<Integer> result = new ArrayList<>();
         Stack<Integer> stack = new Stack<>();
         stack.push(tIndex);
@@ -266,7 +268,6 @@ public class ShortestPath {
             i = path[i];
         }
         while (!stack.isEmpty()) {
-//            System.out.print(g.point[stack.peek()].data + "-->");
             result.add(g.point[stack.pop()].id);
         }
         return result;
@@ -278,7 +279,7 @@ public class ShortestPath {
      * @param g
      * @param path:节点路径
      */
-    private List<Integer> getPathEdge(MyGraph g, List<Integer> path){
+    private static List<Integer> getPathEdge(MyGraph g, List<Integer> path){
         List<Integer> result = new ArrayList<>();
         // s到i的最短路径上的边编号
         for(int i = 1; i < path.size(); i++){
@@ -286,14 +287,4 @@ public class ShortestPath {
         }
         return result;
     }
-
-    public Map<String,Object> getRedundantPath(MyGraph g,List<MyPath> path){
-        Map<String,Object> result = new HashMap<>();
-        List<MyPath> redundantPath = new ArrayList<>();
-        result.put("path",path);
-        result.put("redundantPathReliability",NavigationUtil.getRedundantPathReliability(0.5,0.5,g,path));
-        System.out.println(result);
-        return result;
-    }
-
 }

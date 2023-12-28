@@ -1,4 +1,6 @@
-package Utils;
+package Route.Utils;
+import Route.GraphEntity.MyGraph;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +35,7 @@ public class CutSetTheorem {
         }
     }
 
-    public static double getCombinationsReliability(List<List<Integer>> sets) {
+    public static double getCombinationsReliability(List<List<Integer>> sets,MyGraph graph) {
         List<List<List<Integer>>> combinations = generateCombinations(sets);
         double result = 0.0;
         for (List<List<Integer>> combination : combinations) {
@@ -42,8 +44,8 @@ public class CutSetTheorem {
                 set.addAll(com);
             }
             double cutReliability = 1.0;
-            for (int i = 0; i < set.size();i++){
-                cutReliability *= 0.99;
+            for (int i : set){
+                cutReliability *= graph.edge[i].reliability;
             }
             if(combination.size()%2 == 1){
                 result += cutReliability;

@@ -1,4 +1,4 @@
-package GraphEntity;
+package Route.GraphEntity;
 
 public class MyGraph {
     public Point[] point;

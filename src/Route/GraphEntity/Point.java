@@ -1,4 +1,4 @@
-package GraphEntity;
+package Route.GraphEntity;
 
 public class Point {
     public int id; //该点id
