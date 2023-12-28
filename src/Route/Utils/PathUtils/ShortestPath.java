@@ -30,8 +30,8 @@ public class ShortestPath {
         public String toString() {
             return "path=" + path +
                     ", pathEdge=" + pathEdge +
-                    ", weight=" + weight +
-                    ",reliability="+reliability+ "\n";
+//                    ", weight=" + weight +
+                    ", reliability="+reliability+ "\n";
         }
 
         @Override

@@ -1,6 +1,7 @@
 package Route.Utils.PathUtils;
 
 import Route.GraphEntity.MyGraph;
+import Route.RedundantPath;
 import Route.Utils.NavigationUtil;
 
 import java.util.ArrayList;
@@ -9,8 +10,8 @@ import java.util.Map;
 
 public class GenerateRedundantPath {
 
-    public static List<Map<String,Object>> generateRedundantPath(MyGraph g, List<ShortestPath.MyPath> path, int targetCombinationCount, double reliabilityThreshold){
-        List<Map<String,Object>> selectedCombinations = new ArrayList<>();
+    public static List<RedundantPath> generateRedundantPath(MyGraph g, List<ShortestPath.MyPath> path, int targetCombinationCount, double reliabilityThreshold){
+        List<RedundantPath> selectedCombinations = new ArrayList<>();
         int combinationCount = 0;
 
         for (int i = 1; i <= path.size(); i++) {
@@ -18,7 +19,7 @@ public class GenerateRedundantPath {
             for (List<ShortestPath.MyPath> combination : combinations) {
                 double reliability = NavigationUtil.getRedundantPathReliability(0.5,0.5,g,combination);
                 if (reliability >= reliabilityThreshold) {
-                    selectedCombinations.add(Map.of("冗余路径",combination,"冗余路径可靠度",reliability));
+                    selectedCombinations.add(new RedundantPath(combination,reliability));
                     combinationCount++;
                     if (combinationCount >= targetCombinationCount) {
                         break;
