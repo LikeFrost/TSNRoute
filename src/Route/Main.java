@@ -3,6 +3,8 @@ package Route;
 import Route.GraphEntity.MyGraph;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
@@ -44,8 +46,8 @@ public class Main {
         MyGraph g = new MyGraph(n, e);
         g.createMyGraph(g, n, e, data);
 
-        // 调用ksp并打印最终结果
-        RedundantPath.getRedundantPath(g, 16, 43, 5,5,0.9999);
+        List<Map<String, Object>> redundantPath = RedundantPath.getRedundantPath(g, 16, 43, 5,5,0.9999);
+        System.out.println(redundantPath);
     }
 
 }

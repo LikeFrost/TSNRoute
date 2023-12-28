@@ -1,7 +1,8 @@
 package Route.Utils;
 
 import Route.GraphEntity.*;
-import Route.ShortestPath;
+import Route.Utils.PathUtils.CutSetTheorem;
+import Route.Utils.PathUtils.ShortestPath;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,21 +82,9 @@ public class NavigationUtil {
         for(ShortestPath.MyPath path : pathList){
             paths.add(path.pathEdge);
         }
-        Set<Set<Integer>> minimalCutSets = MinimalCutSetsFinder.findMinimalCutSets(paths);
-        List<List<Integer>> minimalCutLists = convertSetOfSetsToList(minimalCutSets);
-        perReliability = CutSetTheorem.getCombinationsReliability(minimalCutLists,graph);
+        perReliability = CutSetTheorem.getCombinationsReliability(paths,graph);
 
         return temporaryProbability*temReliability + permanentProbability*perReliability;
     }
-    //将set转化为list
-    private static List<List<Integer>> convertSetOfSetsToList(Set<Set<Integer>> setOfSets) {
-        List<List<Integer>> resultList = new ArrayList<>();
 
-        for (Set<Integer> set : setOfSets) {
-            List<Integer> list = new ArrayList<>(set);
-            resultList.add(list);
-        }
-
-        return resultList;
-    }
 }

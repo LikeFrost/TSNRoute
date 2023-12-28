@@ -1,13 +1,13 @@
-package Route.Utils;
+package Route.Utils.PathUtils;
 
 import Route.GraphEntity.MyGraph;
-import Route.ShortestPath;
+import Route.Utils.NavigationUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class PathCombination {
+public class GenerateRedundantPath {
 
     public static List<Map<String,Object>> generateRedundantPath(MyGraph g, List<ShortestPath.MyPath> path, int targetCombinationCount, double reliabilityThreshold){
         List<Map<String,Object>> selectedCombinations = new ArrayList<>();
