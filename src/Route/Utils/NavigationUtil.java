@@ -1,12 +1,11 @@
 package Route.Utils;
 
 import Route.GraphEntity.*;
+import Route.RedundantPath;
 import Route.Utils.PathUtils.CutSetTheorem;
 import Route.Utils.PathUtils.ShortestPath;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class NavigationUtil {
     /**
@@ -86,5 +85,51 @@ public class NavigationUtil {
 
         return temporaryProbability*temReliability + permanentProbability*perReliability;
     }
+    //生成max和min之间的随机数
+    public static double generateRandomNumber(double min, double max) {
+        Random random = new Random();
+        double randomNumber = random.nextDouble() * (max - min) + min;
+        return randomNumber;
+    }
 
+    //随机生成min到max的一对不相同的值
+    private static int[] generateRandomNumbers(int min, int max) {
+        if (min == max) {
+            throw new IllegalArgumentException("The two numbers must be different.");
+        }
+
+        Random random = new Random();
+        int random1 = random.nextInt(max - min - 1) + min + 1;
+        int random2;
+        do {
+            random2 = random.nextInt(max - min - 1) + min + 1;
+        } while (random2 == random1);
+
+        int[] result = {random1, random2};
+        return result;
+    }
+
+    public static List<Flow> generateFlow(int count, int min, int max, double minReliability, double maxReliability){
+        List<Flow> flowList = new ArrayList<>();
+        for (int i = 0; i < count;i++){
+            int [] points = generateRandomNumbers(min,max);
+            List<RedundantPath> redundantPath = new ArrayList<>();
+            flowList.add(new Flow(points[0],points[1],1,generateRandomNumber(minReliability,maxReliability),redundantPath));
+        }
+        return flowList;
+    }
+
+    //将数组转化为List
+    public static List<List<Double>> arrayToList(double[][] array) {
+        List<List<Double>> list = new ArrayList<>();
+
+        for (double[] row : array) {
+            List<Double> sublist = new ArrayList<>();
+            for (double value : row) {
+                sublist.add(value);
+            }
+            list.add(sublist);
+        }
+        return list;
+    }
 }

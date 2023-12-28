@@ -19,4 +19,12 @@ public class Flow {
         this.reliability = reliability;
         this.redundantPath = redundantPath;
     }
+    @Override
+    public String toString(){
+        return "起点是： " + start
+                +" 终点是： " + end
+                +" 最大时延是： " + time
+                +" 最低可靠度是： " + reliability
+                +"\n冗余路径是： " + redundantPath;
+    }
 }

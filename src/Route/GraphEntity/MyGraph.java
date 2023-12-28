@@ -1,5 +1,7 @@
 package Route.GraphEntity;
 
+import java.util.List;
+
 public class MyGraph {
     public Point[] point;
     public Edge[] edge;
@@ -18,7 +20,7 @@ public class MyGraph {
         graph = new Edge[numPoint][numPoint]; //初始化图
     }
 
-    public void createMyGraph(MyGraph MyGraph, int numPoint, int numEdges, double data[][])  //创建图
+    public void createMyGraph(MyGraph MyGraph, int numPoint, int numEdges, List<List<Double>> data)  //创建图
     {
         for (int i = 0; i < numPoint; i++) {
             if (i <= 12) {
@@ -31,7 +33,7 @@ public class MyGraph {
             }
         }
         for (int i = 0; i < numEdges; i++) {
-            MyGraph.edge[i] = new Edge(i,(int) data[i][0],(int) data[i][1],data[i][2],1/data[i][2]);
+            MyGraph.edge[i] = new Edge(i, data.get(i).get(0).intValue(), data.get(i).get(1).intValue(), data.get(i).get(2),1/data.get(i).get(2));
             MyGraph.graph[edge[i].start][edge[i].end] = MyGraph.edge[i];
         }
     }
