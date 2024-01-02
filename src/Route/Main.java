@@ -4,18 +4,18 @@ import Route.GraphEntity.Flow;
 import Route.GraphEntity.MyGraph;
 import Route.Utils.NavigationUtil;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) {
-        try {
-            System.setOut(new java.io.PrintStream(System.out, true, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+    static MyGraph g;
+    static List<Flow> flowList = new ArrayList<>();
+
+    //初始化函数，生成边、流、图、冗余路径、超周期
+    public static void init() {
         int n = 45, e = 106;
         //起点、终点、可靠度
         double data[][] = {{0, 13}, {0, 14}, {0, 15}, {0, 4}, {0, 5},
@@ -47,18 +47,51 @@ public class Main {
         };
         //边集
         List<List<Double>> edgeList = NavigationUtil.arrayToList(data);
-        for (List<Double> sublist : edgeList){
-            sublist.add(NavigationUtil.generateRandomNumber(0.999,0.9999));
+        for (List<Double> sublist : edgeList) {
+            sublist.add(NavigationUtil.generateRandomNumber(0.999, 0.9999));
         }
         //图
-        MyGraph g = new MyGraph(n, e);
+        g = new MyGraph(n, e);
         g.createMyGraph(g, n, e, edgeList);
         //流集
-        List<Flow> flowList = NavigationUtil.generateFlow(10,13,43,0.999,0.99999);
-        for (Flow flow:flowList){
-            flow.redundantPath = RedundantPath.getRedundantPath(g, flow.start, flow.end, 5,5,flow.reliability);
-            System.out.println(flow);
+        flowList = NavigationUtil.generateFlow(2, 13, 43, 0.999, 0.99999);
+        //计算流的冗余路径
+        for (Flow flow : flowList) {
+            flow.redundantPath = RedundantPath.getRedundantPath(g, flow.start, flow.end, 5, 5, flow.reliability);
         }
     }
 
+    public static void output(int[][][][] result) {
+        try {
+            FileWriter writer = new FileWriter("output.txt");
+            writer.write(String.valueOf(g));
+            writer.write(String.valueOf(flowList));
+            writer.write(String.valueOf(result));
+            writer.close();
+            System.out.println("Data has been written to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred while writing to the file.");
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        try {
+            System.setOut(new java.io.PrintStream(System.out, true, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        init();
+        //计算流的超周期
+        int hyperPeriod = NavigationUtil.getHyperPeriod(flowList);
+        //整数线性规划
+        ScheduleWrapper scheduleWrapper = new ScheduleWrapper(g, flowList, "IPL", hyperPeriod);
+        int[][][][] result = scheduleWrapper.getSchedule();
+        //循环result 每一维调用NavigationUtil.result2Connections(result[i])即可得到第i条流的连接关系
+        for (int i = 0; i < result.length; i++) {
+            System.out.println("第" + (i + 1) + "条流的业务连接：");
+            System.out.println(NavigationUtil.result2Connections(result[i]));
+        }
+        output(result);
+    }
 }

@@ -114,7 +114,7 @@ public class NavigationUtil {
         for (int i = 0; i < count;i++){
             int [] points = generateRandomNumbers(min,max);
             List<RedundantPath> redundantPath = new ArrayList<>();
-            flowList.add(new Flow(points[0],points[1],1,generateRandomNumber(minReliability,maxReliability),redundantPath));
+            flowList.add(new Flow(points[0],points[1],100000,1,100,generateRandomNumber(minReliability,maxReliability),redundantPath));
         }
         return flowList;
     }
@@ -132,4 +132,69 @@ public class NavigationUtil {
         }
         return list;
     }
+    public static int getHyperPeriod(List<Flow> flowList){
+        int hyperPeriod = 1;
+        for (Flow flow : flowList){
+            hyperPeriod = calculateLCM(hyperPeriod, flow.period);
+        }
+        return hyperPeriod;
+    }
+    private static int calculateLCM(int i, int j) {
+        return i * j / calculateGCD(i, j);
+    }
+
+    private static int calculateGCD(int i, int j) {
+        int x = i % j;
+        while(x != 0){
+            i = j;
+            j = x;
+            x = i % j;
+        }
+        return j;
+    }
+
+    private static int findNextTarget(int[] array, int startIndex, int target) {
+        for (int index = startIndex; index < array.length; index ++)
+            if (array[index] == target)
+                return index;
+        return array.length;
+    }
+
+    //结果数组转化为业务链接
+    public static List<Connection> result2Connections(int[][][] result) {
+        List<Connection> connections = new ArrayList<>();
+        for(int srcIndex = 0; srcIndex < result.length; srcIndex++) {
+            for (int dstIndex = 0; dstIndex < result[0].length; dstIndex++) {
+                List<Timeslot> timeslots;
+                int[] array = result[srcIndex][dstIndex];
+                // 找到第一个1, 代表时隙的起点
+                int startIndex = findNextTarget(array, 0, 1);
+                // 如果能够找到1, 证明这条链路有时隙分配
+                if (startIndex < array.length) {
+                    timeslots = new ArrayList<>();
+                    while (startIndex < array.length) {
+                        // 找到下一个0, 代表时隙的结尾
+                        int endIndex = findNextTarget(array, startIndex, 0);
+                        // 构建时隙结构体
+                        Timeslot timeslot = new Timeslot();
+                        timeslot.startTime = startIndex;
+                        timeslot.duration = endIndex - startIndex;
+                        timeslots.add(timeslot);
+                        // 继续找下一个1, 即下一个时隙的起点
+                        startIndex = findNextTarget(array, endIndex, 1);
+                    }
+                    // 构建业务连接结构体
+                    Connection connection = new Connection();
+//                    connection.srcNodeId = String.valueOf(nodes.get(srcIndex).id);
+//                    connection.dstNodeId = String.valueOf(nodes.get(dstIndex).id);
+                    connection.srcNodeId = srcIndex+"";
+                    connection.dstNodeId = dstIndex+"";
+                    connection.timeslot = timeslots;
+                    connections.add(connection);
+                }
+            }
+        }
+        return connections;
+    }
+
 }

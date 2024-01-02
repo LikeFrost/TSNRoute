@@ -1,5 +1,6 @@
 package Route.Utils.PathUtils;
 import Route.GraphEntity.*;
+import Route.ScheduleMethods.IPL;
 import Route.Utils.NavigationUtil;
 
 import java.util.*;
@@ -53,6 +54,36 @@ public class ShortestPath {
             temp = Double.doubleToLongBits(weight);
             result = 31 * result + (int) (temp ^ (temp >>> 32));
             return result;
+        }
+    }
+    public static class Link {
+        public int srcNode;
+        public int dstNode;
+        public int hops;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Link link = (Link) o;
+            return Objects.equals(srcNode, link.srcNode) && Objects.equals(dstNode, link.dstNode) && Objects.equals(hops, link.hops);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(srcNode, dstNode, hops);
+        }
+
+        public static List<Link> getLinks(MyPath path) {
+            List<Link> links = new ArrayList<>();
+            for (int i = 1; i < path.path.size(); i++) {
+                Link link = new Link();
+                link.srcNode = path.path.get(i-1);
+                link.dstNode = path.path.get(i);
+                link.hops = i;
+                links.add(link);
+            }
+            return links;
         }
     }
 
