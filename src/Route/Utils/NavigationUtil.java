@@ -114,7 +114,7 @@ public class NavigationUtil {
         for (int i = 0; i < count;i++){
             int [] points = generateRandomNumbers(min,max);
             List<RedundantPath> redundantPath = new ArrayList<>();
-            flowList.add(new Flow(points[0],points[1],100000,1,100,generateRandomNumber(minReliability,maxReliability),redundantPath));
+            flowList.add(new Flow(points[0],points[1],1000,1,100,generateRandomNumber(minReliability,maxReliability),redundantPath));
         }
         return flowList;
     }
@@ -185,8 +185,6 @@ public class NavigationUtil {
                     }
                     // 构建业务连接结构体
                     Connection connection = new Connection();
-//                    connection.srcNodeId = String.valueOf(nodes.get(srcIndex).id);
-//                    connection.dstNodeId = String.valueOf(nodes.get(dstIndex).id);
                     connection.srcNodeId = srcIndex+"";
                     connection.dstNodeId = dstIndex+"";
                     connection.timeslot = timeslots;
@@ -194,6 +192,16 @@ public class NavigationUtil {
                 }
             }
         }
+        Collections.sort(connections, new Comparator<Connection>() {
+            @Override
+            public int compare(Connection c1, Connection c2) {
+                // 比较 Connection 对象的 timeslot 数组的第一个元素的 startTime
+                int startTime1 = c1.getTimeslot().get(0).startTime;
+                int startTime2 = c2.getTimeslot().get(0).startTime;
+                return Integer.compare(startTime1, startTime2);
+            }
+        });
+
         return connections;
     }
 

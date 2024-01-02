@@ -1,14 +1,18 @@
 package Route;
 
+import Route.GraphEntity.Connection;
 import Route.GraphEntity.Flow;
 import Route.GraphEntity.MyGraph;
 import Route.Utils.NavigationUtil;
+import com.google.gson.Gson;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Main {
     static MyGraph g;
@@ -61,12 +65,14 @@ public class Main {
         }
     }
 
-    public static void output(int[][][][] result) {
+    public static void output(List<List<Connection>> connections,String name) {
         try {
-            FileWriter writer = new FileWriter("output.txt");
-            writer.write(String.valueOf(g));
-            writer.write(String.valueOf(flowList));
-            writer.write(String.valueOf(result));
+            FileWriter writer = new FileWriter(name+".json");
+            Gson gson = new Gson();
+            Map<String,Object> map = new HashMap<>();
+            map.put("flows", flowList);
+            map.put("connections", connections);
+            writer.write(gson.toJson(map));
             writer.close();
             System.out.println("Data has been written to the file.");
         } catch (IOException e) {
@@ -84,14 +90,10 @@ public class Main {
         init();
         //计算流的超周期
         int hyperPeriod = NavigationUtil.getHyperPeriod(flowList);
+
         //整数线性规划
-        ScheduleWrapper scheduleWrapper = new ScheduleWrapper(g, flowList, "IPL", hyperPeriod);
-        int[][][][] result = scheduleWrapper.getSchedule();
-        //循环result 每一维调用NavigationUtil.result2Connections(result[i])即可得到第i条流的连接关系
-        for (int i = 0; i < result.length; i++) {
-            System.out.println("第" + (i + 1) + "条流的业务连接：");
-            System.out.println(NavigationUtil.result2Connections(result[i]));
-        }
-        output(result);
+        ScheduleWrapper scheduleIPL = new ScheduleWrapper(g, flowList, "IPL", hyperPeriod);
+        List<List<Connection>> connections = scheduleIPL.getSchedule();
+        output(connections,"IPL");
     }
 }

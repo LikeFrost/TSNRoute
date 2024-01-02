@@ -1,5 +1,7 @@
 package Route.GraphEntity;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,6 +17,15 @@ public class Connection {
     public Integer hyperPeriod;
     public List<Timeslot> timeslot;
 
+    public List<Timeslot> getTimeslot() {
+        Collections.sort(timeslot, new Comparator<Timeslot>() {
+            @Override
+            public int compare(Timeslot t1, Timeslot t2) {
+                return Integer.compare(t1.startTime, t2.startTime);
+            }
+        });
+        return timeslot;
+    }
 
     @Override
     public boolean equals(Object o) {

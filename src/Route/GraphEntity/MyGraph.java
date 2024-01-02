@@ -37,4 +37,5 @@ public class MyGraph {
             MyGraph.graph[edge[i].start][edge[i].end] = MyGraph.edge[i];
         }
     }
+
 }

@@ -1,13 +1,13 @@
 目录结构
 
 └─Route
-    │  Main.java  //主函数
+    │  Route.Main.java  //主函数
 
-​    │  RedundantPath.java  //冗余路径
+​    │  Route.RedundantPath.java  //冗余路径
 
 ​    │
 
-​    ├─GraphEntity  //与图相关的实体
+​    ├─Route.GraphEntity  //与图相关的实体
 
 ​    │      Edge.java
 
@@ -17,7 +17,7 @@
 
 ​    │
 
-​    └─Utils  //工具类
+​    └─Route.Utils  //工具类
 
 ​        │  NavigationUtil.java
 

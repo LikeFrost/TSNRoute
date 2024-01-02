@@ -3,8 +3,8 @@ package Route.GraphEntity;
 import java.util.Objects;
 
 public class Timeslot {
-    public Integer startTime;
-    public Integer duration;
+    public int startTime;
+    public int duration;
 
     @Override
     public boolean equals(Object o) {
