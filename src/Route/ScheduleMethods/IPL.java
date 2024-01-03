@@ -14,22 +14,23 @@ import java.util.*;
 public class IPL {
     private MyGraph graph;
     private List<Flow> flowList;
+    private List<List<Link>> linkPathList;
     private int hyperPeriod = 1;
     private int B;
     private int propagation = 0;
 
-    public IPL(MyGraph graph, List<Flow> flowList) {
+    public IPL(MyGraph graph, List<Flow> flowList, List<List<Link>> linkPathList) {
         this.graph = graph;
         this.flowList = flowList;
         for (Flow flow : flowList) {
             hyperPeriod = calculateLCM(hyperPeriod, flow.period);
         }
         this.B = hyperPeriod * graph.edge.length + 1;
+        this.linkPathList = linkPathList;
     }
 
     public int[][][][] schedule() throws Exception {
         int[][][][] O = new int[flowList.size()][graph.point.length][graph.point.length][hyperPeriod];
-        List<List<Link>> linkPathList = findRoutePath(graph,flowList);
         Map<String, Object> stringObjectMap = ILPSchedule(linkPathList, flowList);
         if (stringObjectMap != null) {
             int[][] Xs = (int[][]) stringObjectMap.get("X");
@@ -52,15 +53,6 @@ public class IPL {
             }
         }
         return O;
-    }
-
-    private List<List<Link>> findRoutePath(MyGraph graph,List<Flow> flowList) {
-        List<List<Link>> linkPathList = new ArrayList<>();
-        for (Flow flow : flowList) {
-            List<ShortestPath.MyPath> path = ShortestPath.KSP_Yen(graph, flow.start, flow.end,1);
-            linkPathList.add(ShortestPath.Link.getLinks(path.get(0)));
-        }
-        return linkPathList;
     }
 
     private Map<String, Object> ILPSchedule(List<List<Link>> linkPathList, List<Flow> flowList) throws IloException {

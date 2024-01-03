@@ -29,6 +29,9 @@ public class GenerateRedundantPath {
                 break;
             }
         }
+        if (selectedCombinations.size() == 0) {
+            selectedCombinations.add(new RedundantPath(path,path.get(0).reliability));
+        }
         return selectedCombinations;
     }
 
