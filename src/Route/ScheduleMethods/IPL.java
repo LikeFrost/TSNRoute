@@ -13,40 +13,6 @@ import java.util.*;
 
 public class IPL {
     private MyGraph graph;
-
-    public MyGraph getTopology() {
-        return graph;
-    }
-
-    public void setTopology(MyGraph graph) {
-        this.graph = graph;
-    }
-
-    public List<Flow> getFlowList() {
-        return flowList;
-    }
-
-    public void setFlowList(List<Flow> flowList) {
-        this.flowList = flowList;
-    }
-
-    public int getHyperPeriod() {
-        return hyperPeriod;
-    }
-
-    public void setHyperPeriod(int hyperPeriod) {
-        this.hyperPeriod = hyperPeriod;
-    }
-
-    public int getB() {
-        return B;
-    }
-
-    public void setB(int b) {
-        B = b;
-    }
-
-
     private List<Flow> flowList;
     private int hyperPeriod = 1;
     private int B;
@@ -72,7 +38,6 @@ public class IPL {
             for (int j = 0; j < flowList.size(); j++) {
                 for (int start = 0; start < hyperPeriod; start++) {
                     if (Xs[j][start] == 1) {
-//                        for (int k = 0; k < pathList.get(j).size() - 1; k++) {
                         for (Link link: linkPathList.get(j)) {
                             for (int d = 0; d < flowList.get(j).duration; d++) {
                                 for (int p = 0; p < hyperPeriod / flowList.get(j).period; p++) {
@@ -106,6 +71,7 @@ public class IPL {
 //        cplex.setOut(null);
         IloIntVar[][] Xs = new IloIntVar[flowList.size()][hyperPeriod];
         IloIntVar[][][][] H = new IloIntVar[flowList.size()][graph.point.length][graph.point.length][hyperPeriod];
+        //将Xs和H变量加入到cplex中，并定义取值范围为0-1
         for (int i = 0; i < flowList.size(); i++) {
             for (int j = 0; j < hyperPeriod; j++) {
                 Xs[i][j] = cplex.intVar(0, 1);
@@ -118,7 +84,7 @@ public class IPL {
                 }
             }
         }
-
+        //目标函数表达式
         IloIntExpr maxObjectFunction = cplex.intExpr();
 
         //Transmission Constraints
