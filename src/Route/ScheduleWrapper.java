@@ -4,6 +4,7 @@ import Route.GraphEntity.Connection;
 import Route.GraphEntity.Flow;
 import Route.GraphEntity.MyGraph;
 import Route.ScheduleMethods.IPL;
+import Route.ScheduleMethods.TabuSearch;
 import Route.Utils.NavigationUtil;
 import Route.Utils.PathUtils.ShortestPath;
 
@@ -37,11 +38,21 @@ public class ScheduleWrapper {
             }
             flowPathCount.add(flow.redundantPath.get(0).redundantPath.size());
         }
+
         int[][][][] result = new int[newFlows.size()][graph.point.length][graph.point.length][hyperPeriod];
         if(algorithm.equals("IPL")){
             IPL ipl = new IPL(graph, newFlows,newLinkPathList);
             try {
                 result = ipl.schedule();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if(algorithm.equals("TS")){
+            TabuSearch tabuSearch = new TabuSearch(graph, newFlows,newLinkPathList);
+            try {
+                result = tabuSearch.schedule();
             } catch (Exception e) {
                 e.printStackTrace();
             }

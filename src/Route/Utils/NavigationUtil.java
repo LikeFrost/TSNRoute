@@ -86,9 +86,14 @@ public class NavigationUtil {
         return temporaryProbability*temReliability + permanentProbability*perReliability;
     }
     //生成max和min之间的随机数
-    public static double generateRandomNumber(double min, double max) {
+    public static double generateRandomDoubleNumber(double min, double max) {
         Random random = new Random();
         double randomNumber = random.nextDouble() * (max - min) + min;
+        return randomNumber;
+    }
+    public static int generateRandomIntNumber(int min, int max) {
+        Random random = new Random();
+        int randomNumber = random.nextInt(max - min)+ min;
         return randomNumber;
     }
 
@@ -114,7 +119,7 @@ public class NavigationUtil {
         for (int i = 0; i < count;i++){
             int [] points = generateRandomNumbers(min,max);
             List<RedundantPath> redundantPath = new ArrayList<>();
-            flowList.add(new Flow(points[0],points[1],1000,1,100,generateRandomNumber(minReliability,maxReliability),redundantPath));
+            flowList.add(new Flow(points[0],points[1],1000,1, generateRandomIntNumber(1,5)*100,generateRandomDoubleNumber(minReliability,maxReliability),redundantPath));
         }
         return flowList;
     }

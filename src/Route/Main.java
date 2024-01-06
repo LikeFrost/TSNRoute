@@ -21,7 +21,7 @@ public class Main {
     //初始化函数，生成边、流、图、冗余路径、超周期
     public static void init() {
         int n = 45, e = 106;
-        //起点、终点、可靠度
+//        起点、终点、可靠度
         double data[][] = {{0, 13}, {0, 14}, {0, 15}, {0, 4}, {0, 5},
                 {1, 16}, {1, 17}, {1, 4}, {1, 5},
                 {2, 18}, {2, 19}, {2, 20}, {2, 21}, {2, 22}, {2, 4}, {2, 5},
@@ -49,16 +49,20 @@ public class Main {
                 {40, 11}, {41, 11},
                 {42, 12}, {43, 12}
         };
+//        int n = 4, e = 6;
+//        double data [][] = {{0,1},{1,2},{2,3},{1,0},{2,1},{3,2} };
         //边集
         List<List<Double>> edgeList = NavigationUtil.arrayToList(data);
         for (List<Double> sublist : edgeList) {
-            sublist.add(NavigationUtil.generateRandomNumber(0.999, 0.9999));
+            sublist.add(NavigationUtil.generateRandomDoubleNumber(0.999, 0.9999));
         }
         //图
         g = new MyGraph(n, e);
         g.createMyGraph(g, n, e, edgeList);
         //流集
-        flowList = NavigationUtil.generateFlow(3, 13, 43, 0.999, 0.99999);
+        flowList = NavigationUtil.generateFlow(2, 13, 43, 0.999, 0.99999);
+//        flowList = NavigationUtil.generateFlow(4, -1, 4, 0.999, 0.99999);
+
         //计算流的冗余路径
         for (Flow flow : flowList) {
             flow.redundantPath = RedundantPath.getRedundantPath(g, flow.start, flow.end, 5, 5, flow.reliability);
@@ -74,6 +78,7 @@ public class Main {
             map.put("connections", connections);
             writer.write(gson.toJson(map));
             writer.close();
+//            System.out.println(gson.toJson(map));
             System.out.println("Data has been written to the file.");
         } catch (IOException e) {
             System.out.println("An error occurred while writing to the file.");
@@ -96,5 +101,10 @@ public class Main {
         ScheduleWrapper scheduleIPL = new ScheduleWrapper(g, flowList, "IPL", hyperPeriod);
         List<List<List<Connection>>> connections = scheduleIPL.getSchedule();
         output(connections,"IPL");
+
+        //禁忌搜索
+        ScheduleWrapper scheduleTS = new ScheduleWrapper(g, flowList, "TS", hyperPeriod);
+        List<List<List<Connection>>> connectionsTS = scheduleTS.getSchedule();
+        output(connectionsTS,"TS");
     }
 }
