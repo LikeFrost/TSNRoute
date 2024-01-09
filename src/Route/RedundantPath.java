@@ -12,6 +12,7 @@ public class RedundantPath {
     public int HC = 0;  //最大跳数
     public int OF = 0;  //瓶颈链路负载计数
     public int CO = 0;  //路径条数
+    public double WT = 0;  //路径评价指标
 
     public RedundantPath(){}
     public RedundantPath(List<ShortestPath.MyPath> redundantPath,double redundantPathReliability){
@@ -32,6 +33,7 @@ public class RedundantPath {
                 +"; 最大跳数："+HC
                 +"; 瓶颈链路负载计数："+OF
                 +"; 路径条数："+CO
+                +"; 路径成本评价指标："+WT
                 +"\n路径为:"+redundantPath+"\n";
     }
 

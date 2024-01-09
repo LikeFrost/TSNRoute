@@ -210,4 +210,65 @@ public class NavigationUtil {
         return connections;
     }
 
+    public static List<Flow> sortPathByScore(List<Flow> flowList, int e, int hyperPeriod){
+        double n = 0; //每组冗余路径的平均条数
+        double _HC = e;
+        double _OF = 0;
+        double _CO = 0;
+        for (Flow flow : flowList){
+            n += flow.redundantPath.size();
+        }
+        n = n/flowList.size();
+        _CO = flowList.size()*n;
+        for (Flow flow : flowList){
+            _OF += hyperPeriod/flow.period;
+        }
+        _OF = _OF*n;
+        for (Flow flow : flowList){
+            for (RedundantPath redundantPath : flow.redundantPath){
+                redundantPath.WT = getPathScore(redundantPath,_HC,_OF,_CO);
+            }
+            Collections.sort(flow.redundantPath, new Comparator<RedundantPath>() {
+                @Override
+                public int compare(RedundantPath o1, RedundantPath o2) {
+                    return Double.compare(o2.WT, o1.WT);
+                }
+            });
+        }
+        return flowList;
+    }
+
+    public static double getPathScore(RedundantPath redundantPath, double _HC, double _OF, double _CO){
+        double w1 = 1;
+        double w2 = 1;
+        double w3 = 1;
+        return w1 * redundantPath.HC/(1+_HC) + w2 * redundantPath.OF/(1+_OF) + w3 * redundantPath.CO/(1+_CO);
+    }
+
+    public static List<Flow> updatePathOF(List<Flow> flowList, int [][][] slotUse){
+        List<List<Integer>> pathUse = new ArrayList<>();
+        for (int i = 0; i < slotUse.length; i++){
+            pathUse.add(new ArrayList<>());
+            for (int j = 0; j < slotUse[i].length; j++){
+                pathUse.get(i).add(0);
+                for (int k = 0; k < slotUse[i][j].length; k++){
+                    pathUse.get(i).set(j,pathUse.get(i).get(j)+slotUse[i][j][k]);
+                }
+            }
+        }
+        for(Flow flow:flowList){
+            for(RedundantPath redundantPath:flow.redundantPath){
+                for (int i = 0; i < redundantPath.redundantPath.size(); i++){
+                    for (int j = 0; j < redundantPath.redundantPath.get(i).path.size()-1;j++){
+                        int src = redundantPath.redundantPath.get(i).path.get(j);
+                        int dst = redundantPath.redundantPath.get(i).path.get(j+1);
+                        if(pathUse.get(src).get(dst) > redundantPath.OF){
+                            redundantPath.OF = pathUse.get(src).get(dst);
+                        }
+                    }
+                }
+            }
+        }
+        return flowList;
+    }
 }

@@ -63,17 +63,20 @@ public class Main {
         flowList = NavigationUtil.generateFlow(2, 13, 43, 0.999, 0.99999);
 //        flowList = NavigationUtil.generateFlow(4, -1, 4, 0.999, 0.99999);
 
+        int redundantPathNum = 5;  //冗余路径数
         //计算流的冗余路径
         for (Flow flow : flowList) {
-            flow.redundantPath = RedundantPath.getRedundantPath(g, flow.start, flow.end, 5, 5, flow.reliability);
+            flow.redundantPath = RedundantPath.getRedundantPath(g, flow.start, flow.end, 5, redundantPathNum, flow.reliability);
         }
+        int hyperPeriod = NavigationUtil.getHyperPeriod(flowList);
+        NavigationUtil.sortPathByScore(flowList, e, hyperPeriod);
     }
 
-    public static void output(List<List<List<Connection>>> connections,String name) {
+    public static void output(List<List<List<Connection>>> connections, String name) {
         try {
-            FileWriter writer = new FileWriter(name+".json");
+            FileWriter writer = new FileWriter(name + ".json");
             Gson gson = new Gson();
-            Map<String,Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>();
             map.put("flows", flowList);
             map.put("connections", connections);
             writer.write(gson.toJson(map));
@@ -100,11 +103,11 @@ public class Main {
         //整数线性规划
         ScheduleWrapper scheduleIPL = new ScheduleWrapper(g, flowList, "IPL", hyperPeriod);
         List<List<List<Connection>>> connections = scheduleIPL.getSchedule();
-        output(connections,"IPL");
+        output(connections, "IPL");
 
         //禁忌搜索
         ScheduleWrapper scheduleTS = new ScheduleWrapper(g, flowList, "TS", hyperPeriod);
         List<List<List<Connection>>> connectionsTS = scheduleTS.getSchedule();
-        output(connectionsTS,"TS");
+        output(connectionsTS, "TS");
     }
 }

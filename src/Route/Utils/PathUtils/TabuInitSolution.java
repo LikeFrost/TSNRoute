@@ -53,6 +53,7 @@ public class TabuInitSolution {
                 }
             }
         }
+//        System.out.println(NavigationUtil.updatePathOF(flowList,linkSlotUse));
         return initSolution;
     }
 }
