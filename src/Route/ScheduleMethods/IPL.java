@@ -1,9 +1,8 @@
 package Route.ScheduleMethods;
 
 import Route.GraphEntity.Flow;
+import Route.GraphEntity.Link;
 import Route.GraphEntity.MyGraph;
-import Route.Utils.PathUtils.ShortestPath;
-import Route.Utils.PathUtils.ShortestPath.Link;
 import ilog.concert.IloException;
 import ilog.concert.IloIntExpr;
 import ilog.concert.IloIntVar;

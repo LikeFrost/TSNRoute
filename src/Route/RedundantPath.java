@@ -1,6 +1,7 @@
 package Route;
 
 import Route.GraphEntity.MyGraph;
+import Route.GraphEntity.MyPath;
 import Route.Utils.PathUtils.GenerateRedundantPath;
 import Route.Utils.PathUtils.ShortestPath;
 
@@ -8,17 +9,17 @@ import java.util.List;
 
 public class RedundantPath {
     public double redundantPathReliability;
-    public List<ShortestPath.MyPath> redundantPath;
+    public List<MyPath> redundantPath;
     public int HC = 0;  //最大跳数
     public int OF = 0;  //瓶颈链路负载计数
     public int CO = 0;  //路径条数
     public double WT = 0;  //路径评价指标
 
     public RedundantPath(){}
-    public RedundantPath(List<ShortestPath.MyPath> redundantPath,double redundantPathReliability){
+    public RedundantPath(List<MyPath> redundantPath, double redundantPathReliability){
         this.redundantPathReliability = redundantPathReliability;
         this.redundantPath = redundantPath;
-        for (ShortestPath.MyPath path:redundantPath){
+        for (MyPath path:redundantPath){
             if(path.pathEdge.size()>this.HC){
                 this.HC = path.pathEdge.size();
             }
@@ -37,8 +38,8 @@ public class RedundantPath {
                 +"\n路径为:"+redundantPath+"\n";
     }
 
-    public static List<RedundantPath> getRedundantPath(MyGraph g, int startIndex, int endIndex, int pathCount, int targetCombinationCount, double reliabilityThreshold){
-        List<ShortestPath.MyPath> path = ShortestPath.KSP_Yen(g, startIndex, endIndex,pathCount);
+    public List<RedundantPath> getRedundantPath(MyGraph g, int startIndex, int endIndex, int pathCount, int targetCombinationCount, double reliabilityThreshold){
+        List<MyPath> path = ShortestPath.KSP_Yen(g, startIndex, endIndex,pathCount);
         List<RedundantPath> combinations = GenerateRedundantPath.generateRedundantPath(g,path,targetCombinationCount,reliabilityThreshold);
         return combinations;
     }

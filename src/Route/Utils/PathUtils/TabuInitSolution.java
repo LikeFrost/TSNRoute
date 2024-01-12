@@ -1,6 +1,7 @@
 package Route.Utils.PathUtils;
 
 import Route.GraphEntity.Flow;
+import Route.GraphEntity.Link;
 import Route.GraphEntity.MyGraph;
 import Route.Utils.NavigationUtil;
 
@@ -9,10 +10,10 @@ import java.util.List;
 public class TabuInitSolution {
     private MyGraph graph;
     private List<Flow> flowList;
-    private List<List<ShortestPath.Link>> linkPathList;
+    private List<List<Link>> linkPathList;
     private int hyperPeriod = 1;
 
-    public TabuInitSolution(MyGraph graph, List<Flow> flowList, List<List<ShortestPath.Link>> linkPathList) {
+    public TabuInitSolution(MyGraph graph, List<Flow> flowList, List<List<Link>> linkPathList) {
         this.graph = graph;
         this.flowList = flowList;
         this.hyperPeriod = NavigationUtil.getHyperPeriod(flowList);

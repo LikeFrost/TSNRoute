@@ -2,14 +2,15 @@ package Route;
 
 import Route.GraphEntity.Connection;
 import Route.GraphEntity.Flow;
+import Route.GraphEntity.Link;
 import Route.GraphEntity.MyGraph;
 import Route.ScheduleMethods.IPL;
 import Route.ScheduleMethods.TabuSearch;
 import Route.Utils.NavigationUtil;
-import Route.Utils.PathUtils.ShortestPath;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ScheduleWrapper {
     MyGraph graph;
@@ -24,17 +25,18 @@ public class ScheduleWrapper {
         this.hyperPeriod = hyperPeriod;
     }
 
-    public List<List<List<Connection>>> getSchedule(){
+    public Map<String,Object> getSchedule(){
+        Map<String,Object> scheduleResult = new HashMap<>();
         //新流
         List<Flow> newFlows = new ArrayList<>();
         //流对应的路径
-        List<List<ShortestPath.Link>> newLinkPathList = new ArrayList<>();
+        List<List<Link>> newLinkPathList = new ArrayList<>();
         //流对应的路径数
         List<Integer> flowPathCount = new ArrayList<>();
         for (Flow flow : flows) {
             for (int i = 0; i < flow.redundantPath.get(0).redundantPath.size(); i++) {
                 newFlows.add((flow));
-                newLinkPathList.add(ShortestPath.Link.getLinks(flow.redundantPath.get(0).redundantPath.get(i)));
+                newLinkPathList.add(Link.getLinks(flow.redundantPath.get(0).redundantPath.get(i)));
             }
             flowPathCount.add(flow.redundantPath.get(0).redundantPath.size());
         }
@@ -61,13 +63,22 @@ public class ScheduleWrapper {
         //转化为connections
         List<List<List<Connection>>> connections = new ArrayList<>();
         int k = 0;
+        int successCount = 0;
         for (int i = 0; i < flows.size(); i++) {
             List<List<Connection>> connection = new ArrayList<>();
+            int flag = 1;
             for (int j = 0; j < flowPathCount.get(i); j++) {
-                connection.add(NavigationUtil.result2Connections(result[k++]));
+                List<Connection> temp = NavigationUtil.result2Connections(result[k++]);
+                if(temp.size() == 0){
+                    flag = 0;
+                }
+                connection.add(temp);
             }
             connections.add(connection);
+            successCount += flag;
         }
-        return connections;
+        scheduleResult.put("successRate",successCount/flows.size());
+        scheduleResult.put("connections",connections);
+        return scheduleResult;
     }
 }

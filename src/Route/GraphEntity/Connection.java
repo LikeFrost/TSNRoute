@@ -13,8 +13,8 @@ public class Connection {
     public String srcPortId;
     public String dstNodeId;
     public String dstPortId;
-    public Integer trailStep;
-    public Integer hyperPeriod;
+    public int trailStep;
+    public int hyperPeriod;
     public List<Timeslot> timeslot;
 
     public List<Timeslot> getTimeslot() {

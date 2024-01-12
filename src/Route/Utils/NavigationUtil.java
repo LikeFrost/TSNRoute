@@ -66,7 +66,7 @@ public class NavigationUtil {
      * @param pathList
      * @return
      */
-    public static double getRedundantPathReliability(double temporaryProbability, double permanentProbability, MyGraph graph, List<ShortestPath.MyPath> pathList){
+    public static double getRedundantPathReliability(double temporaryProbability, double permanentProbability, MyGraph graph, List<MyPath> pathList){
         double temReliability = 1;
         double perReliability = 1;
 
@@ -78,7 +78,7 @@ public class NavigationUtil {
 
         //永久故障
         List<List<Integer>> paths = new ArrayList<>();
-        for(ShortestPath.MyPath path : pathList){
+        for(MyPath path : pathList){
             paths.add(path.pathEdge);
         }
         perReliability = CutSetTheorem.getCombinationsReliability(paths,graph);

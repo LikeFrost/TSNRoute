@@ -1,6 +1,7 @@
 package Route.Utils.PathUtils;
 
 import Route.GraphEntity.MyGraph;
+import Route.GraphEntity.MyPath;
 import Route.RedundantPath;
 import Route.Utils.NavigationUtil;
 
@@ -9,13 +10,13 @@ import java.util.List;
 
 public class GenerateRedundantPath {
 
-    public static List<RedundantPath> generateRedundantPath(MyGraph g, List<ShortestPath.MyPath> path, int targetCombinationCount, double reliabilityThreshold){
+    public static List<RedundantPath> generateRedundantPath(MyGraph g, List<MyPath> path, int targetCombinationCount, double reliabilityThreshold){
         List<RedundantPath> selectedCombinations = new ArrayList<>();
         int combinationCount = 0;
 
         for (int i = 1; i <= path.size(); i++) {
-            List<List<ShortestPath.MyPath>> combinations = generateCombinations(path, i);
-            for (List<ShortestPath.MyPath> combination : combinations) {
+            List<List<MyPath>> combinations = generateCombinations(path, i);
+            for (List<MyPath> combination : combinations) {
                 double reliability = NavigationUtil.getRedundantPathReliability(0.5,0.5,g,combination);
                 if (reliability >= reliabilityThreshold) {
                     selectedCombinations.add(new RedundantPath(combination,reliability));
@@ -36,20 +37,20 @@ public class GenerateRedundantPath {
     }
 
     // 生成指定长度的路径组合
-    private static List<List<ShortestPath.MyPath>> generateCombinations(List<ShortestPath.MyPath> paths, int length) {
-        List<List<ShortestPath.MyPath>> combinations = new ArrayList<>();
+    private static List<List<MyPath>> generateCombinations(List<MyPath> paths, int length) {
+        List<List<MyPath>> combinations = new ArrayList<>();
         generateCombinationsHelper(paths, length, 0, new ArrayList<>(), combinations);
         return combinations;
     }
 
-    private static void generateCombinationsHelper(List<ShortestPath.MyPath> paths, int length, int index, List<ShortestPath.MyPath> currentCombination, List<List<ShortestPath.MyPath>> combinations) {
+    private static void generateCombinationsHelper(List<MyPath> paths, int length, int index, List<MyPath> currentCombination, List<List<MyPath>> combinations) {
         if (currentCombination.size() == length) {
             combinations.add(new ArrayList<>(currentCombination));
             return;
         }
 
         for (int i = index; i < paths.size(); i++) {
-            ShortestPath.MyPath path = paths.get(i);
+            MyPath path = paths.get(i);
             currentCombination.add(path);
             generateCombinationsHelper(paths, length, i + 1, currentCombination, combinations);
             currentCombination.remove(currentCombination.size() - 1);

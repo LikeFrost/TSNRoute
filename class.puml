@@ -1,0 +1,207 @@
+@startuml class
+
+package "GraphEntity" {
+    class Connection{
+        +String connectionId
+        +String streamId
+        +String linkId
+        +String srcNodeId
+        +String srcPortId
+        +String dstNodeId
+        +String dstPortId
+        +int trailStep
+        +int hyperPeriod
+        +List<Timeslot> timeslot
+
+        +List<Timeslot> getTimeslot()
+
+    }
+    note left of Connection::getTimeslot
+        将Connection内的时隙
+        按开始时间排序
+    end note
+
+    class Edge{
+        +int id
+        +int start
+        +int end
+        +double reliability
+        +double weight
+        +Edge()
+    }
+
+    class Flow{
+        +int start
+        +int end
+        +int ddl
+        +int duration
+        +int period
+        +double reliability
+        +List<ReduantPath> reduantPath
+        +Flow()
+    }
+
+    class MyGraph{
+        +Point[] point
+        +Edge[] edge
+        +Edge[][] graph
+        +int numPoint
+        +int numEdges
+        +MyGraph()
+        +void createMyGraph()
+    }
+    note left of MyGraph::createMyGraph
+        创建图
+    end note
+
+    class Point{
+        +int id
+        +String type
+        +Point()
+    }
+
+    class Timeslot{
+        +int startTime
+        +int duration
+    }
+
+    class Link{
+        +int srcNode
+        +int dstNode
+        +int hops
+    }
+
+    class MyPath{
+        +List<Integer> path
+        +List<Integer> pathEdge
+        +double weight
+        +double reliability
+        +MyPath()
+    }
+}
+
+Connection "1" --> "0..*" Timeslot
+MyGraph "1" --> "0..*" Point
+MyGraph "1" --> "0..*" Edge
+
+package "ScheduleMethods"{
+    class IPL{
+        -MyGraph graph
+        -List<Flow> flows
+        -List<List<Link>> linkPathList
+        -int hyperPeriod
+        -int B
+        -int propagation
+        +IPL()
+        +int[][][][] schedule()
+        -Map<String, Object> IPLSchedule()
+        -int calculateLCM()
+        -int calculateGCD()
+    }
+
+    class TabuSearch{
+        -MyGraph graph
+        -List<Flow> flows
+        -List<List<Link>> linkPathList
+        -int hyperPeriod
+        +TabuSearch()
+        +int[][][][] schedule()
+    }
+}
+
+package "Utils"{
+    package "PathUtils"{
+        class CutSetTheorem{
+            -{static} List<List<List<Integer>>> generateCombinations()
+            -{static} void generateCombinationsHelper()
+            +{static} double getCombinationsReliability()
+            -{static} List<List<Integer>> convertSetOfSetsToList()
+        }
+        class MinimalCutSetsFinder{
+            +{static} Set<Set<Integer>> findMinimalCutSets()
+            -{static} void generateCombinations()
+            -{static} boolean isMinimalCutSet()
+            -{static} Set<Set<Integer>> deleteSet()
+        }
+        class GenerateRedundantPath{
+            +{static} List<RedundantPath> generateRedundantPath()
+            -{static} List<List<ShortestPath.MyPath>> generateCombinations()
+            -{static} void generateCombinationsHelper()
+        }
+        class ShortestPath{
+            +{static} List<MyPath> KSP_Yen()
+            +{static} MyPath getFitPathFromCandidate()
+            +{static} MyPath getSingleShortestPath_dijkstra()
+            +{static} List<Integer> getMinimumPath()
+            +{static} List<Integer> getPathEdge
+        }
+        class TabuInitSolution{
+            -MyGraph graph
+            -List<Flow> flowList
+            -List<List<Link>> linkPathList
+            -int hyperPeriod
+            +TabuInitSolution()
+            +int[][][][] initSolution()
+        }
+    }
+    class NavigationUtil {
+        -{static} double getEdgeWeight()
+        -{static} double getEdgeReliability()
+        -{static} boolean isConnected()
+        -{static} double getPathReliability()
+        -{static} double getRedundantPathReliability()
+        +{static} double generateRandomDoubleNumber()
+        +{static} int generateRandomIntNumber()
+        -{static} int[] generateRandomNumbers() 
+        +{static} List<Flow> generateFlow()
+        +{static} List<List<Double>> arrayToList()
+        +{static} int getHyperPeriod()
+        -{static} int calculateLCM()
+        -{static} int calculateGCD()
+        -{static} int findNextTarget()
+        +{static} List<Connection> result2Connections()
+        +{static} List<Flow> sortPathByScore() 
+        +{static} double getPathScore()
+        +{static} List<Flow> updatePathOF()
+    }
+    note top of CutSetTheorem
+        使用割集定理计算可靠性
+    end note
+    note top of MinimalCutSetsFinder
+        寻找最小割集
+    end note
+    note top of GenerateRedundantPath
+        生成冗余路径
+    end note
+    note top of ShortestPath
+        生成K条最短路径
+    end note
+    note top of TabuInitSolution
+        禁忌搜索初始解
+    end note
+}
+class Main{
+    -{static} MyGraph g
+    -{static} List<Flow> flowList
+    +{static} void init()
+    +{static} void output()
+    +{static} void main()
+}
+class RedundantPath{
+    +double redundantPathReliability
+    +List<MyPath> redundantPath
+    +int HC
+    +int OF
+    +int CO
+    +double WT
+    +RedundantPath()
+    +List<RedundantPath> getRedundantPath()
+}
+class ScheduleWrapper{
+    -MyGraph graph
+    -List<Flow> flows
+    -String algorithm
+    -int hyperPeriod
+    +ScheduleWrapper()
+    +Map<String,Object> getSchedule()
+}
