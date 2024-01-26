@@ -13,17 +13,19 @@ public class TabuSearch {
     private List<Flow> flowList;
     private List<List<Link>> linkPathList;
     private int hyperPeriod = 1;
+    private List<Integer> flowPathCount;
 
-    public TabuSearch(MyGraph graph, List<Flow> flowList, List<List<Link>> linkPathList) {
+    public TabuSearch(MyGraph graph, List<Flow> flowList, List<List<Link>> linkPathList,List<Integer> flowPathCount){
         this.graph = graph;
         this.flowList = flowList;
         this.hyperPeriod = NavigationUtil.getHyperPeriod(flowList);
         this.linkPathList = linkPathList;
+        this.flowPathCount =flowPathCount;
     }
 
     public int[][][][] schedule() throws Exception{
         //初始解
-        TabuInitSolution initSolution = new TabuInitSolution(graph, flowList, linkPathList);
+        TabuInitSolution initSolution = new TabuInitSolution(graph, flowList, linkPathList,flowPathCount);
         int[][][][] result = initSolution.initSolution();
         return result;
     }

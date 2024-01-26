@@ -52,7 +52,7 @@ public class ScheduleWrapper {
         }
 
         if(algorithm.equals("TS")){
-            TabuSearch tabuSearch = new TabuSearch(graph, newFlows,newLinkPathList);
+            TabuSearch tabuSearch = new TabuSearch(graph, newFlows,newLinkPathList,flowPathCount);
             try {
                 result = tabuSearch.schedule();
             } catch (Exception e) {
