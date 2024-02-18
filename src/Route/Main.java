@@ -101,9 +101,9 @@ public class Main {
         int hyperPeriod = NavigationUtil.getHyperPeriod(flowList);
 
         //整数线性规划
-        ScheduleWrapper scheduleIPL = new ScheduleWrapper(g, flowList, "IPL", hyperPeriod);
-        Map<String,Object> scheduleResultIPL = scheduleIPL.getSchedule();
-        output(scheduleResultIPL, "IPL");
+//        ScheduleWrapper scheduleIPL = new ScheduleWrapper(g, flowList, "IPL", hyperPeriod);
+//        Map<String,Object> scheduleResultIPL = scheduleIPL.getSchedule();
+//        output(scheduleResultIPL, "IPL");
 
         //禁忌搜索
         ScheduleWrapper scheduleTS = new ScheduleWrapper(g, flowList, "TS", hyperPeriod);

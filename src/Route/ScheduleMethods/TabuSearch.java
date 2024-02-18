@@ -11,22 +11,17 @@ import java.util.List;
 public class TabuSearch {
     private MyGraph graph;
     private List<Flow> flowList;
-    private List<List<Link>> linkPathList;
-    private int hyperPeriod = 1;
-    private List<Integer> flowPathCount;
 
-    public TabuSearch(MyGraph graph, List<Flow> flowList, List<List<Link>> linkPathList,List<Integer> flowPathCount){
+    public TabuSearch(MyGraph graph, List<Flow> flowList){
         this.graph = graph;
         this.flowList = flowList;
-        this.hyperPeriod = NavigationUtil.getHyperPeriod(flowList);
-        this.linkPathList = linkPathList;
-        this.flowPathCount =flowPathCount;
+//        this.hyperPeriod = NavigationUtil.getHyperPeriod(flowList);
     }
 
-    public int[][][][] schedule() throws Exception{
+    public int[][][][][] schedule() throws Exception{
         //初始解
-        TabuInitSolution initSolution = new TabuInitSolution(graph, flowList, linkPathList,flowPathCount);
-        int[][][][] result = initSolution.initSolution();
+        TabuInitSolution initSolution = new TabuInitSolution(graph, flowList);
+        int[][][][][] result = initSolution.initSolution();
         return result;
     }
 }

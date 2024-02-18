@@ -12,6 +12,7 @@ public class Flow {
     public int period;  //周期
     public double reliability;
     public List<RedundantPath> redundantPath;
+    public int pathIndex = 0;
 
     public Flow(){}
     public Flow(int start, int end, int ddl, int duration,int period, double reliability, List<RedundantPath> redundantPath){
@@ -22,6 +23,7 @@ public class Flow {
         this.period = period;
         this.reliability = reliability;
         this.redundantPath = redundantPath;
+        this.pathIndex = 0;
     }
     @Override
     public String toString(){
@@ -30,6 +32,8 @@ public class Flow {
                 +" 最大时延是： " + ddl
                 +" 周期是： " + period
                 +" 最低可靠度是： " + reliability
-                +"\n冗余路径是： " + redundantPath;
+                +"\n冗余路径是： " + redundantPath
+                +"\n选择的冗余路径下标是： " + pathIndex;
+
     }
 }
