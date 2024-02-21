@@ -119,7 +119,7 @@ public class NavigationUtil {
         for (int i = 0; i < count;i++){
             int [] points = generateRandomNumbers(min,max);
             List<RedundantPath> redundantPath = new ArrayList<>();
-            flowList.add(new Flow(points[0],points[1],1000,1, generateRandomIntNumber(1,5)*100,generateRandomDoubleNumber(minReliability,maxReliability),redundantPath));
+            flowList.add(new Flow(points[0],points[1],1000,1, generateRandomIntNumber(1,4)*100,generateRandomDoubleNumber(minReliability,maxReliability),redundantPath));
         }
         return flowList;
     }

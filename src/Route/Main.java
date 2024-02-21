@@ -60,7 +60,7 @@ public class Main {
         g = new MyGraph(n, e);
         g.createMyGraph(g, n, e, edgeList);
         //流集
-        flowList = NavigationUtil.generateFlow(2, 13, 43, 0.999, 0.99999);
+        flowList = NavigationUtil.generateFlow(10, 13, 43, 0.999, 0.99999);
 //        flowList = NavigationUtil.generateFlow(4, -1, 4, 0.999, 0.99999);
 
         int redundantPathNum = 5;  //冗余路径数

@@ -72,7 +72,7 @@ public class ScheduleWrapper {
         return scheduleResult;
     }
 
-    public Map<String,Object>getTabuSearchSchedule(){
+    public Map<String, Object> getTabuSearchSchedule() {
         int[][][][][] result = new int[flows.size()][7][graph.point.length][graph.point.length][hyperPeriod];
         TabuSearch tabuSearch = new TabuSearch(graph, this.flows);
         try {
@@ -82,7 +82,7 @@ public class ScheduleWrapper {
         }
         //转化为connections
         List<List<List<Connection>>> connections = new ArrayList<>();
-        int k = 0;
+
         int successCount = 0;
         for (int i = 0; i < flows.size(); i++) {
             List<List<Connection>> connection = new ArrayList<>();
@@ -103,7 +103,7 @@ public class ScheduleWrapper {
         return scheduleResult;
     }
 
-    public Map<String, Object> getSchedule(){
+    public Map<String, Object> getSchedule() {
         if (algorithm.equals("IPL")) {
             return getIPLSchedule();
         }

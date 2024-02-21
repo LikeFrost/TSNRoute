@@ -3,9 +3,13 @@ package Route.Utils.PathUtils;
 import Route.GraphEntity.Flow;
 import Route.GraphEntity.Link;
 import Route.GraphEntity.MyGraph;
+import Route.ResultEntity.TabuSolution;
 import Route.Utils.NavigationUtil;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TabuInitSolution {
     private MyGraph graph;
@@ -18,11 +22,14 @@ public class TabuInitSolution {
         this.hyperPeriod = NavigationUtil.getHyperPeriod(flowList);
     }
 
-    public int[][][][][] initSolution() throws Exception {
+    public TabuSolution initSolution() throws Exception {
+        TabuSolution result = new TabuSolution();
         //flow在链路上占据的时隙
         int[][][][][] initSolution = new int[flowList.size()][10][graph.point.length][graph.point.length][hyperPeriod];
         int[][][] linkSlotUse = new int[graph.point.length][graph.point.length][hyperPeriod];
-        //输出linkSlotUse
+
+        List<Integer> successIndex = new ArrayList<>();
+        List<Integer> failIndex = new ArrayList<>();
 
         for (int i = 0; i < flowList.size(); i++) {
             eachPath:
@@ -63,11 +70,17 @@ public class TabuInitSolution {
                     initSolution = tempSolution;
                     linkSlotUse = tempLinkSlotUse;
                     flowList.get(i).pathIndex = j;
+                    successIndex.add(i);
                     break eachPath;
+                }else if(j == flowList.get(i).redundantPath.size() - 1){
+                    failIndex.add(i);
                 }
             }
         }
-
-        return initSolution;
+        result.successIndex = successIndex;
+        result.failIndex = failIndex;
+        result.solution = initSolution;
+        result.successRate = (double) successIndex.size() / (successIndex.size() + failIndex.size());
+        return result;
     }
 }
