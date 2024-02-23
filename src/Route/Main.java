@@ -60,7 +60,7 @@ public class Main {
         g = new MyGraph(n, e);
         g.createMyGraph(g, n, e, edgeList);
         //流集
-        flowList = NavigationUtil.generateFlow(10, 13, 43, 0.999, 0.99999);
+        flowList = NavigationUtil.generateFlow(200, 13, 43, 0.999, 0.99999);
 //        flowList = NavigationUtil.generateFlow(4, -1, 4, 0.999, 0.99999);
 
         int redundantPathNum = 5;  //冗余路径数
@@ -68,6 +68,8 @@ public class Main {
         for (Flow flow : flowList) {
             flow.redundantPath = new RedundantPath().getRedundantPath(g, flow.start, flow.end, 5, redundantPathNum, flow.reliability);
         }
+
+        System.out.println("Graph and flow and path generation completed.");
         int hyperPeriod = NavigationUtil.getHyperPeriod(flowList);
         NavigationUtil.sortPathByScore(flowList, e, hyperPeriod);
     }

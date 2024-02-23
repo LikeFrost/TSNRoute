@@ -40,7 +40,7 @@ public class TabuInitSolution {
                 for (int k = 0; k < flowList.get(i).redundantPath.get(j).redundantPath.size(); k++) {
                     List<Link> linkPathList = Link.getLinks(flowList.get(i).redundantPath.get(j).redundantPath.get(k));
                     eachStart:
-                    for (int start = 0; start < hyperPeriod - flowList.get(i).duration; start++) {
+                    for (int start = 0; start < flowList.get(i).period - flowList.get(i).duration*linkPathList.size(); start++) {
                         boolean flag = true;
                         eachLink:
                         for (int l = 0; l < linkPathList.size(); l++) {
