@@ -3,97 +3,103 @@ package Route.Utils;
 import Route.GraphEntity.*;
 import Route.RedundantPath;
 import Route.Utils.PathUtils.CutSetTheorem;
-import Route.Utils.PathUtils.ShortestPath;
 
 import java.util.*;
 
 public class NavigationUtil {
+    public static double totalDoor = 0;
+    public static boolean isUpdateOF = false;
+
     /**
      * 获取两点之间权值
+     *
      * @param graph
      * @param i
      * @param j
      * @return
      */
-    public static double getEdgeWeight(MyGraph graph, int i, int j)
-    {
+    public static double getEdgeWeight(MyGraph graph, int i, int j) {
         return graph.graph[i][j].weight;
     }
 
     /**
      * 获取两点之间可靠度
+     *
      * @param graph
      * @param i
      * @param j
      * @return
      */
-    public static double getEdgeReliability(MyGraph graph, int i, int j)
-    {
-        return 1/graph.graph[i][j].weight;
+    public static double getEdgeReliability(MyGraph graph, int i, int j) {
+        return 1 / graph.graph[i][j].weight;
     }
 
     /**
      * 判断两点是否连通
+     *
      * @param graph
      * @param i
      * @param j
      * @return
      */
-    public static boolean isConnected(MyGraph graph,int i,int j)
-    {
+    public static boolean isConnected(MyGraph graph, int i, int j) {
         return graph.graph[i][j].weight < Double.MAX_VALUE;
     }
 
     /**
      * 获取一条链路的可靠性
+     *
      * @param graph
      * @param path
      * @return
      */
-    public static double getPathReliability(MyGraph graph, List<Integer> path){
+    public static double getPathReliability(MyGraph graph, List<Integer> path) {
         double reliability = 1;
-        for(int i = 0; i < path.size()-1; i++){
-            reliability *= 1/NavigationUtil.getEdgeWeight(graph, path.get(i), path.get(i+1));
+        for (int i = 0; i < path.size() - 1; i++) {
+            reliability *= 1 / NavigationUtil.getEdgeWeight(graph, path.get(i), path.get(i + 1));
         }
         return reliability;
     }
 
     /**
      * 获取冗余路径组的可靠性
+     *
      * @param graph
      * @param temporaryProbability
      * @param permanentProbability
      * @param pathList
      * @return
      */
-    public static double getRedundantPathReliability(double temporaryProbability, double permanentProbability, MyGraph graph, List<MyPath> pathList){
+    public static double getRedundantPathReliability(double temporaryProbability, double permanentProbability, MyGraph graph, List<MyPath> pathList) {
         double temReliability = 1;
         double perReliability = 1;
 
         //瞬时故障
-        for(int i = 0; i <= pathList.size()-1; i++){
-            temReliability *= (1-pathList.get(i).reliability);
+        for (int i = 0; i <= pathList.size() - 1; i++) {
+            temReliability *= (1 - pathList.get(i).reliability);
         }
-        temReliability = 1-temReliability;
+        temReliability = 1 - temReliability;
 
         //永久故障
         List<List<Integer>> paths = new ArrayList<>();
-        for(MyPath path : pathList){
+        for (MyPath path : pathList) {
             paths.add(path.pathEdge);
         }
-        perReliability = CutSetTheorem.getCombinationsReliability(paths,graph);
+        perReliability = CutSetTheorem.getCombinationsReliability(paths, graph);
 
-        return temporaryProbability*temReliability + permanentProbability*perReliability;
+        return temporaryProbability * temReliability + permanentProbability * perReliability;
     }
+
     //生成max和min之间的随机数
     public static double generateRandomDoubleNumber(double min, double max) {
         Random random = new Random();
         double randomNumber = random.nextDouble() * (max - min) + min;
         return randomNumber;
     }
+
     public static int generateRandomIntNumber(int min, int max) {
         Random random = new Random();
-        int randomNumber = random.nextInt(max - min)+ min;
+        int randomNumber = random.nextInt(max - min) + min;
         return randomNumber;
     }
 
@@ -114,12 +120,12 @@ public class NavigationUtil {
         return result;
     }
 
-    public static List<Flow> generateFlow(int count, int min, int max, double minReliability, double maxReliability){
+    public static List<Flow> generateFlow(int count, int min, int max, double minReliability, double maxReliability) {
         List<Flow> flowList = new ArrayList<>();
-        for (int i = 0; i < count;i++){
-            int [] points = generateRandomNumbers(min,max);
+        for (int i = 0; i < count; i++) {
+            int[] points = generateRandomNumbers(min, max);
             List<RedundantPath> redundantPath = new ArrayList<>();
-            flowList.add(new Flow(points[0],points[1],1000,1, generateRandomIntNumber(1,4)*100,generateRandomDoubleNumber(minReliability,maxReliability),redundantPath));
+            flowList.add(new Flow(points[0], points[1], 1000, 1, generateRandomIntNumber(1, 4) * 100, generateRandomDoubleNumber(minReliability, maxReliability), redundantPath));
         }
         return flowList;
     }
@@ -137,20 +143,22 @@ public class NavigationUtil {
         }
         return list;
     }
-    public static int getHyperPeriod(List<Flow> flowList){
+
+    public static int getHyperPeriod(List<Flow> flowList) {
         int hyperPeriod = 1;
-        for (Flow flow : flowList){
+        for (Flow flow : flowList) {
             hyperPeriod = calculateLCM(hyperPeriod, flow.period);
         }
         return hyperPeriod;
     }
+
     private static int calculateLCM(int i, int j) {
         return i * j / calculateGCD(i, j);
     }
 
     private static int calculateGCD(int i, int j) {
         int x = i % j;
-        while(x != 0){
+        while (x != 0) {
             i = j;
             j = x;
             x = i % j;
@@ -159,7 +167,7 @@ public class NavigationUtil {
     }
 
     private static int findNextTarget(int[] array, int startIndex, int target) {
-        for (int index = startIndex; index < array.length; index ++)
+        for (int index = startIndex; index < array.length; index++)
             if (array[index] == target)
                 return index;
         return array.length;
@@ -168,7 +176,7 @@ public class NavigationUtil {
     //结果数组转化为业务链接
     public static List<Connection> result2Connections(int[][][] result) {
         List<Connection> connections = new ArrayList<>();
-        for(int srcIndex = 0; srcIndex < result.length; srcIndex++) {
+        for (int srcIndex = 0; srcIndex < result.length; srcIndex++) {
             for (int dstIndex = 0; dstIndex < result[0].length; dstIndex++) {
                 List<Timeslot> timeslots;
                 int[] array = result[srcIndex][dstIndex];
@@ -190,8 +198,8 @@ public class NavigationUtil {
                     }
                     // 构建业务连接结构体
                     Connection connection = new Connection();
-                    connection.srcNodeId = srcIndex+"";
-                    connection.dstNodeId = dstIndex+"";
+                    connection.srcNodeId = srcIndex + "";
+                    connection.dstNodeId = dstIndex + "";
                     connection.timeslot = timeslots;
                     connections.add(connection);
                 }
@@ -210,23 +218,23 @@ public class NavigationUtil {
         return connections;
     }
 
-    public static List<Flow> sortPathByScore(List<Flow> flowList, int e, int hyperPeriod){
+    public static List<Flow> sortPathByScore(List<Flow> flowList, int e, int hyperPeriod) {
         double n = 0; //每组冗余路径的平均条数
         double _HC = e;
         double _OF = 0;
         double _CO = 0;
-        for (Flow flow : flowList){
+        for (Flow flow : flowList) {
             n += flow.redundantPath.size();
         }
-        n = n/flowList.size();
-        _CO = flowList.size()*n;
-        for (Flow flow : flowList){
-            _OF += hyperPeriod/flow.period;
+        n = n / flowList.size();
+        _CO = flowList.size() * n;
+        for (Flow flow : flowList) {
+            _OF += hyperPeriod / flow.period;
         }
-        _OF = _OF*n;
-        for (Flow flow : flowList){
-            for (RedundantPath redundantPath : flow.redundantPath){
-                redundantPath.WT = getPathScore(redundantPath,_HC,_OF,_CO);
+        _OF = _OF * n;
+        for (Flow flow : flowList) {
+            for (RedundantPath redundantPath : flow.redundantPath) {
+                redundantPath.WT = getPathScore(redundantPath, _HC, _OF, _CO);
             }
             Collections.sort(flow.redundantPath, new Comparator<RedundantPath>() {
                 @Override
@@ -238,37 +246,66 @@ public class NavigationUtil {
         return flowList;
     }
 
-    public static double getPathScore(RedundantPath redundantPath, double _HC, double _OF, double _CO){
+    public static double getPathScore(RedundantPath redundantPath, double _HC, double _OF, double _CO) {
         double w1 = 1;
         double w2 = 1;
         double w3 = 1;
-        return w1 * redundantPath.HC/(1+_HC) + w2 * redundantPath.OF/(1+_OF) + w3 * redundantPath.CO/(1+_CO);
+        return w1 * redundantPath.HC / (1 + _HC) + w2 * redundantPath.OF / (1 + _OF) + w3 * redundantPath.CO / (1 + _CO);
     }
 
-    public static List<Flow> updatePathOF(List<Flow> flowList, int [][][] slotUse){
-        List<List<Integer>> pathUse = new ArrayList<>();
-        for (int i = 0; i < slotUse.length; i++){
-            pathUse.add(new ArrayList<>());
-            for (int j = 0; j < slotUse[i].length; j++){
-                pathUse.get(i).add(0);
-                for (int k = 0; k < slotUse[i][j].length; k++){
-                    pathUse.get(i).set(j,pathUse.get(i).get(j)+slotUse[i][j][k]);
+    public static int[][] getPathUse(int[][][] slotUse) {
+        int[][] pathUse = new int[slotUse.length][slotUse[0].length];
+        for (int i = 0; i < slotUse.length; i++) {
+            for (int j = 0; j < slotUse[i].length; j++) {
+                for (int k = 0; k < slotUse[i][j].length; k++) {
+                    pathUse[i][j] += slotUse[i][j][k];
                 }
             }
         }
-        for(Flow flow:flowList){
-            for(RedundantPath redundantPath:flow.redundantPath){
-                for (int i = 0; i < redundantPath.redundantPath.size(); i++){
-                    for (int j = 0; j < redundantPath.redundantPath.get(i).path.size()-1;j++){
+        return pathUse;
+    }
+
+    public static List<Flow> updatePathOF(List<Flow> flowList, int[][][] slotUse) {
+        int[][] pathUse = getPathUse(slotUse);
+
+        for (Flow flow : flowList) {
+            for (RedundantPath redundantPath : flow.redundantPath) {
+                for (int i = 0; i < redundantPath.redundantPath.size(); i++) {
+                    for (int j = 0; j < redundantPath.redundantPath.get(i).path.size() - 1; j++) {
                         int src = redundantPath.redundantPath.get(i).path.get(j);
-                        int dst = redundantPath.redundantPath.get(i).path.get(j+1);
-                        if(pathUse.get(src).get(dst) > redundantPath.OF){
-                            redundantPath.OF = pathUse.get(src).get(dst);
-                        }
+                        int dst = redundantPath.redundantPath.get(i).path.get(j + 1);
+                        redundantPath.OF = pathUse[src][dst];
                     }
                 }
             }
         }
         return flowList;
+    }
+
+    public static List<Flow> calcDoor(List<Flow> flowList, int hyperPeriod, int[][][] slotUse) {
+        if(!isUpdateOF){
+            if (totalDoor == 0) {
+                int count = 0;
+                for (Flow flow : flowList) {
+                    int path = 0;
+                    for (int i = 0; i < flow.redundantPath.get(0).redundantPath.size(); i++) {
+                        path += flow.redundantPath.get(0).redundantPath.get(i).path.size();
+                    }
+                    count += hyperPeriod / flow.period * path;
+                }
+                totalDoor = count / 106; //106条边
+            }
+            int[][] pathUse = getPathUse(slotUse);
+            for (int i = 0; i < pathUse.length; i++) {
+                for (int j = i + i; j < pathUse[0].length; j++) {
+                    if (totalDoor - pathUse[i][j] <= 0) {
+                        isUpdateOF = true;
+                        return updatePathOF(flowList, slotUse);
+                    }
+                }
+            }
+            return flowList;
+        }
+        else return updatePathOF(flowList, slotUse);
     }
 }

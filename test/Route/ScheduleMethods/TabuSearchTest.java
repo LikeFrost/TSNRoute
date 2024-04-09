@@ -12,7 +12,7 @@ class TabuSearchTest {
     void testPermute(){
         TabuSearch tabuSearch = new TabuSearch();
         List<Integer> nums = Arrays.asList(1,2,3,4,5);
-        System.out.println(tabuSearch.permute(nums,10));
+//        System.out.println(tabuSearch.permute(nums,10));
     }
 
 }

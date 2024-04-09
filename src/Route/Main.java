@@ -60,7 +60,7 @@ public class Main {
         g = new MyGraph(n, e);
         g.createMyGraph(g, n, e, edgeList);
         //流集
-        flowList = NavigationUtil.generateFlow(200, 13, 43, 0.999, 0.99999);
+        flowList = NavigationUtil.generateFlow(10, 13, 43, 0.999, 0.99999);
 //        flowList = NavigationUtil.generateFlow(4, -1, 4, 0.999, 0.99999);
 
         int redundantPathNum = 5;  //冗余路径数
@@ -108,8 +108,8 @@ public class Main {
 //        output(scheduleResultIPL, "IPL");
 
         //禁忌搜索
-        ScheduleWrapper scheduleTS = new ScheduleWrapper(g, flowList, "TS", hyperPeriod);
+        ScheduleWrapper scheduleTS = new ScheduleWrapper(g, flowList, "MyTS", hyperPeriod);
         Map<String,Object> scheduleResultTS = scheduleTS.getSchedule();
-        output(scheduleResultTS, "TS");
+        output(scheduleResultTS, "MyTS");
     }
 }

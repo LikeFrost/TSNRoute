@@ -9,20 +9,48 @@ import Route.Utils.PathUtils.TabuInitSolution;
 
 import java.util.*;
 
-public class TabuSearch {
+public class MyTabu {
     private MyGraph graph;
     private List<Flow> flowList;
     private List<TabuNode> tabuList = new ArrayList<>();
     private int hyperPeriod = 1;
     private int tabuLength = 5;
 
-    public TabuSearch(MyGraph graph, List<Flow> flowList) {
+    public MyTabu(MyGraph graph, List<Flow> flowList) {
         this.graph = graph;
         this.flowList = flowList;
         this.hyperPeriod = NavigationUtil.getHyperPeriod(flowList);
     }
 
-    public TabuSearch() {
+    public MyTabu() {
+    }
+
+    public static List<List<Integer>> permute(List<Integer> nums, int limit) {
+        List<List<Integer>> permutations = new ArrayList<>();
+
+        if (nums.size() == 0) {
+            permutations.add(new ArrayList<>());
+            return permutations;
+        }
+
+        Collections.shuffle(nums); // 随机打乱数字列表顺序
+        Integer first = nums.get(0);
+        List<Integer> remaining = nums.subList(1, nums.size());
+        List<List<Integer>> subPermutations = permute(remaining, limit);
+
+        for (List<Integer> subPermutation : subPermutations) {
+            for (int i = 0; i <= subPermutation.size(); i++) {
+                List<Integer> permutation = new ArrayList<>(subPermutation);
+                permutation.add(i, first);
+                permutations.add(permutation);
+
+                if (permutations.size() == limit) {
+                    return permutations; // 达到限制，直接返回结果
+                }
+            }
+        }
+
+        return permutations;
     }
 
     private TabuSolution searchNeighbor(List<Integer> neighbor, List<Integer> successIndex, int[][][][][] solution) {
@@ -96,23 +124,23 @@ public class TabuSearch {
         result.failIndex = failIndex;
         result.solution = initSolution;
         result.successRate = (double) successIndex.size() / (successIndex.size() + failIndex.size());
+        flowList = NavigationUtil.calcDoor(flowList, hyperPeriod, linkSlotUse);
         return result;
     }
 
     public TabuSolution search(TabuSolution current, TabuSolution best, int times) {
-        System.out.println("times" + times);
-        System.out.println("successIndex" + current.successIndex);
-        System.out.println("failIndex" + current.failIndex);
-        System.out.println("successRate" + current.successRate);
-        System.out.println("bestFail" + best.failIndex);
+        System.out.println("myTabu-times" + times);
+        System.out.println("myTabu-successIndex" + current.successIndex);
+        System.out.println("myTabu-failIndex" + current.failIndex);
+        System.out.println("myTabu-successRate" + current.successRate);
         if (times >= 100) {
             return best;
         }
         if (best.successRate == 1) {
             return best;
         }
-        //将成功的流随机移动到失败的流中
-        List<Integer> neighbor = moveSuccessToFail(current.successIndex, current.failIndex);
+        //将成功的流随机移动到失败的流中，并生成全排列
+        List<List<Integer>> neighbors = moveSuccessToFail(current.successIndex, current.failIndex);
 
         //将failIndex中的流调度清空
         int length1 = current.solution[0].length;
@@ -131,20 +159,32 @@ public class TabuSearch {
             }
         }
 
-        //遍历邻居，找出不在禁忌列表的最优解
-
-        TabuSolution neighborSolution = searchNeighbor(neighbor, current.successIndex, current.solution);
-        TabuNode tabuNode = new TabuNode(neighborSolution.successIndex, neighborSolution.failIndex);
-        if (neighborSolution.successRate > best.successRate) {
-            if (tabuList.size() == tabuLength) {
-                tabuList.remove(0);
-                tabuList.add(tabuNode);
-            } else {
+        //遍历所有邻居，找出不在禁忌列表的最优解
+        TabuSolution bestNeighbor = new TabuSolution();
+        for (List<Integer> neighbor : neighbors) {
+            TabuSolution neighborSolution = searchNeighbor(neighbor, current.successIndex, current.solution);
+            TabuNode tabuNode = new TabuNode(neighborSolution.successIndex, neighborSolution.failIndex);
+            if (!tabuList.contains(tabuNode) && neighborSolution.successRate > bestNeighbor.successRate) {
+                if (tabuList.size() == tabuLength) {
+                    tabuList.remove(0);
+                    tabuList.add(tabuNode);
+                } else {
+                    tabuList.add(tabuNode);
+                }
+                bestNeighbor = neighborSolution;
+                if (bestNeighbor.successRate > best.successRate) {
+                    best = bestNeighbor;
+                }
+            }
+            if (tabuList.contains(tabuNode) && neighborSolution.successRate > best.successRate) {
+                best = neighborSolution;
+                bestNeighbor = neighborSolution;
+                tabuList.remove(tabuNode);
                 tabuList.add(tabuNode);
             }
-                best = neighborSolution;
         }
-        return search(neighborSolution, best, times + 1);
+
+        return search(bestNeighbor, best, times + neighbors.size());
     }
 
     public int[][][][][] schedule() throws Exception {
@@ -152,14 +192,14 @@ public class TabuSearch {
         TabuInitSolution initSolution = new TabuInitSolution(graph, flowList);
         TabuSolution init = initSolution.initSolution();
         TabuSolution result = search(init, init, 0);
-        System.out.println("best");
-        System.out.println("successRate" + result.successRate);
-        System.out.println("successIndex" + result.successIndex);
-        System.out.println("failIndex" + result.failIndex);
+        System.out.println("myTabu-best");
+        System.out.println("myTabu-successRate" + result.successRate);
+        System.out.println("myTabu-successIndex" + result.successIndex);
+        System.out.println("myTabu-failIndex" + result.failIndex);
         return result.solution;
     }
 
-    private List<Integer> moveSuccessToFail(List<Integer> successIndex, List<Integer> failIndex) {
+    private List<List<Integer>> moveSuccessToFail(List<Integer> successIndex, List<Integer> failIndex) {
         Random random = new Random();
         int moveIndex = Math.min(successIndex.size(), failIndex.size());
         while (moveIndex > 0) {
@@ -168,7 +208,7 @@ public class TabuSearch {
             successIndex.remove(index);
             moveIndex--;
         }
-        return failIndex;
+        return permute(failIndex, 10);
     }
 
     private class TabuNode {
