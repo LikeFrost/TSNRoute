@@ -6,6 +6,8 @@ import Route.Utils.PathUtils.CutSetTheorem;
 
 import java.util.*;
 
+import static java.lang.Math.sqrt;
+
 public class NavigationUtil {
     public static double totalDoor = 0;
     public static boolean isUpdateOF = false;
@@ -280,6 +282,21 @@ public class NavigationUtil {
             }
         }
         return flowList;
+    }
+
+    public static double calcOF2(MyGraph myGraph, int[][][] slotUse){
+        int[][] pathUse = getPathUse(slotUse);
+        double OF2 = 0; //方差
+        double avg = 0;
+        for(Edge edge : myGraph.edge){
+            avg += pathUse[edge.start][edge.end];
+        }
+        avg = avg / myGraph.edge.length;
+        for(Edge edge : myGraph.edge){
+            OF2 += Math.pow(pathUse[edge.start][edge.end] - avg, 2);
+        }
+        OF2 = sqrt(OF2 / myGraph.edge.length);
+        return OF2;
     }
 
     public static List<Flow> calcDoor(List<Flow> flowList, int hyperPeriod, int[][][] slotUse) {

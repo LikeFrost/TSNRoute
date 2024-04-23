@@ -124,6 +124,8 @@ public class MyTabu {
         result.failIndex = failIndex;
         result.solution = initSolution;
         result.successRate = (double) successIndex.size() / (successIndex.size() + failIndex.size());
+        result.OF2 = NavigationUtil.calcOF2(graph,linkSlotUse);
+        result.calcScore();   //计算结果评价指标
         flowList = NavigationUtil.calcDoor(flowList, hyperPeriod, linkSlotUse);
         return result;
     }
@@ -133,12 +135,14 @@ public class MyTabu {
         System.out.println("myTabu-successIndex" + current.successIndex);
         System.out.println("myTabu-failIndex" + current.failIndex);
         System.out.println("myTabu-successRate" + current.successRate);
+        System.out.println("myTabu-OF2" + current.OF2);
+        System.out.println("myTabu-score" + current.score);
         if (times >= 100) {
             return best;
         }
-        if (best.successRate == 1) {
-            return best;
-        }
+//        if (best.successRate == 1) {
+//            return best;
+//        }
         //将成功的流随机移动到失败的流中，并生成全排列
         List<List<Integer>> neighbors = moveSuccessToFail(current.successIndex, current.failIndex);
 
@@ -164,7 +168,7 @@ public class MyTabu {
         for (List<Integer> neighbor : neighbors) {
             TabuSolution neighborSolution = searchNeighbor(neighbor, current.successIndex, current.solution);
             TabuNode tabuNode = new TabuNode(neighborSolution.successIndex, neighborSolution.failIndex);
-            if (!tabuList.contains(tabuNode) && neighborSolution.successRate > bestNeighbor.successRate) {
+            if (!tabuList.contains(tabuNode) && neighborSolution.score > bestNeighbor.score) {
                 if (tabuList.size() == tabuLength) {
                     tabuList.remove(0);
                     tabuList.add(tabuNode);
@@ -172,11 +176,11 @@ public class MyTabu {
                     tabuList.add(tabuNode);
                 }
                 bestNeighbor = neighborSolution;
-                if (bestNeighbor.successRate > best.successRate) {
+                if (bestNeighbor.score > best.score) {
                     best = bestNeighbor;
                 }
             }
-            if (tabuList.contains(tabuNode) && neighborSolution.successRate > best.successRate) {
+            if (tabuList.contains(tabuNode) && neighborSolution.score > best.score) {
                 best = neighborSolution;
                 bestNeighbor = neighborSolution;
                 tabuList.remove(tabuNode);
@@ -194,6 +198,8 @@ public class MyTabu {
         TabuSolution result = search(init, init, 0);
         System.out.println("myTabu-best");
         System.out.println("myTabu-successRate" + result.successRate);
+        System.out.println("myTabu-OF2" + result.OF2);
+        System.out.println("myTabu-score" + result.score);
         System.out.println("myTabu-successIndex" + result.successIndex);
         System.out.println("myTabu-failIndex" + result.failIndex);
         return result.solution;

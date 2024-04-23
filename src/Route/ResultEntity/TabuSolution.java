@@ -7,7 +7,9 @@ public class TabuSolution {
     public List<Integer> successIndex;
     public List<Integer> failIndex;
     public int[][][][][] solution;
-    public double successRate;
+    public double successRate;  // 成功率
+    public double OF2;  //链路负载方差
+    public double score;  //评价标准
 
     // 原始构造函数
     public TabuSolution(List<Integer> successIndex, List<Integer> failIndex, int[][][][][] solution, double successRate) {
@@ -22,6 +24,12 @@ public class TabuSolution {
     }
 
     public TabuSolution() {
+    }
+
+    public void calcScore(){
+        double k1 = 1;
+        double k2 = 1;
+        this.score = k1 * this.successRate + k2 * 1 / this.OF2;
     }
 
     // 深拷贝多维数组的方法
