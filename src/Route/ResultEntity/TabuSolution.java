@@ -1,26 +1,30 @@
 package Route.ResultEntity;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class TabuSolution {
-    public List<Integer> successIndex;
-    public List<Integer> failIndex;
-    public int[][][][][] solution;
+    public List<Integer> successIndex = new ArrayList<>();
+    public List<Integer> failIndex = new ArrayList<>();
+    public int[][][][][] solution = new int[0][0][0][0][0];
     public double successRate;  // 成功率
     public double OF2;  //链路负载方差
     public double score;  //评价标准
 
     // 原始构造函数
-    public TabuSolution(List<Integer> successIndex, List<Integer> failIndex, int[][][][][] solution, double successRate) {
+    public TabuSolution(List<Integer> successIndex, List<Integer> failIndex, int[][][][][] solution, double successRate, double OF2) {
         // 对于List<Integer>，使用new ArrayList<>(existingList)来创建一个新的列表副本
         this.successIndex = new ArrayList<>(successIndex);
         this.failIndex = new ArrayList<>(failIndex);
 
         // 对于多维数组，需要手动复制每一层
-        this.solution = deepCopySolution(solution);
+        this.solution = solution;
 
         this.successRate = successRate;
+        this.OF2 = OF2;
+        this.calcScore();
     }
 
     public TabuSolution() {
@@ -34,29 +38,9 @@ public class TabuSolution {
 
     // 深拷贝多维数组的方法
     public int[][][][][] deepCopySolution(int[][][][][] original) {
-        if (original == null) return null;
-
-        int[][][][][] copy = new int[original.length][][][][];
-        for (int i = 0; i < original.length; i++) {
-            if (original[i] == null) continue;
-
-            copy[i] = new int[original[i].length][][][];
-            for (int j = 0; j < original[i].length; j++) {
-                if (original[i][j] == null) continue;
-
-                copy[i][j] = new int[original[i][j].length][][];
-                for (int k = 0; k < original[i][j].length; k++) {
-                    if (original[i][j][k] == null) continue;
-
-                    copy[i][j][k] = new int[original[i][j][k].length][];
-                    for (int l = 0; l < original[i][j][k].length; l++) {
-                        if (original[i][j][k][l] == null) continue;
-
-                        copy[i][j][k][l] = original[i][j][k][l].clone(); // 最内层的数组可以直接使用clone()
-                    }
-                }
-            }
-        }
-        return copy;
+        Gson gson = new Gson();
+        String json = gson.toJson(original);
+        int[][][][][] copied = gson.fromJson(json, int[][][][][].class);
+        return copied;
     }
 }

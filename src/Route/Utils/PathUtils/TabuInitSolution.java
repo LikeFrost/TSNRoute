@@ -25,7 +25,7 @@ public class TabuInitSolution {
     public TabuSolution initSolution() throws Exception {
         TabuSolution result = new TabuSolution();
         //flow在链路上占据的时隙
-        int[][][][][] initSolution = new int[flowList.size()][10][graph.point.length][graph.point.length][hyperPeriod];
+        int[][][][][] initSolution = new int[flowList.size()][6][graph.point.length][graph.point.length][hyperPeriod];
         int[][][] linkSlotUse = new int[graph.point.length][graph.point.length][hyperPeriod];
 
         List<Integer> successIndex = new ArrayList<>();
@@ -81,6 +81,8 @@ public class TabuInitSolution {
         result.failIndex = failIndex;
         result.solution = initSolution;
         result.successRate = (double) successIndex.size() / (successIndex.size() + failIndex.size());
+        result.OF2 = NavigationUtil.calcOF2(graph, linkSlotUse);
+        result.calcScore();
         return result;
     }
 }

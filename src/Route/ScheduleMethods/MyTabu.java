@@ -14,7 +14,8 @@ public class MyTabu {
     private List<Flow> flowList;
     private List<TabuNode> tabuList = new ArrayList<>();
     private int hyperPeriod = 1;
-    private int tabuLength = 5;
+    private int tabuLength = 10;
+    private int kTime = 0; //k个随机排列
 
     public MyTabu(MyGraph graph, List<Flow> flowList) {
         this.graph = graph;
@@ -53,8 +54,17 @@ public class MyTabu {
         return permutations;
     }
 
+    public static List<List<Integer>> getRandomList(List<Integer> nums, int limit){
+        List<List<Integer>> result = new ArrayList<>();
+        for (int i = 0; i < limit; i++) {
+            List<Integer> temp = new ArrayList<>(nums);
+            Collections.shuffle(temp);
+            result.add(temp);
+        }
+        return result;
+    }
+
     private TabuSolution searchNeighbor(List<Integer> neighbor, List<Integer> successIndex, int[][][][][] solution) {
-        TabuSolution result = new TabuSolution();
         //flow在链路上占据的时隙
         int[][][][][] initSolution = solution;
         int[][][] linkSlotUse = new int[graph.point.length][graph.point.length][hyperPeriod];
@@ -120,12 +130,7 @@ public class MyTabu {
                 }
             }
         }
-        result.successIndex = successIndex;
-        result.failIndex = failIndex;
-        result.solution = initSolution;
-        result.successRate = (double) successIndex.size() / (successIndex.size() + failIndex.size());
-        result.OF2 = NavigationUtil.calcOF2(graph,linkSlotUse);
-        result.calcScore();   //计算结果评价指标
+        TabuSolution result = new TabuSolution(successIndex, failIndex, initSolution, (double) successIndex.size() / (successIndex.size() + failIndex.size()), NavigationUtil.calcOF2(graph, linkSlotUse));
         flowList = NavigationUtil.calcDoor(flowList, hyperPeriod, linkSlotUse);
         return result;
     }
@@ -137,26 +142,28 @@ public class MyTabu {
         System.out.println("myTabu-successRate" + current.successRate);
         System.out.println("myTabu-OF2" + current.OF2);
         System.out.println("myTabu-score" + current.score);
-        if (times >= 100) {
+        if (times >= 1000 || times >= this.kTime * this.kTime) {
             return best;
         }
-//        if (best.successRate == 1) {
-//            return best;
-//        }
+        if (best.successRate == 1) {
+            return best;
+        }
         //将成功的流随机移动到失败的流中，并生成全排列
         List<List<Integer>> neighbors = moveSuccessToFail(current.successIndex, current.failIndex);
 
         //将failIndex中的流调度清空
-        int length1 = current.solution[0].length;
-        int length2 = current.solution[0][0].length;
-        int length3 = current.solution[0][0][0].length;
-        int length4 = current.solution[0][0][0][0].length;
-        for (int i = 0; i < current.failIndex.size(); i++) {
-            for (int j = 0; j < length1; j++) {
-                for (int k = 0; k < length2; k++) {
-                    for (int l = 0; l < length3; l++) {
-                        for (int m = 0; m < length4; m++) {
-                            current.solution[current.failIndex.get(i)][j][k][l][m] = 0;
+        if(current.failIndex.size() > 0){
+            int length1 = current.solution[0].length;
+            int length2 = current.solution[0][0].length;
+            int length3 = current.solution[0][0][0].length;
+            int length4 = current.solution[0][0][0][0].length;
+            for (int i = 0; i < current.failIndex.size(); i++) {
+                for (int j = 0; j < length1; j++) {
+                    for (int k = 0; k < length2; k++) {
+                        for (int l = 0; l < length3; l++) {
+                            for (int m = 0; m < length4; m++) {
+                                current.solution[current.failIndex.get(i)][j][k][l][m] = 0;
+                            }
                         }
                     }
                 }
@@ -195,6 +202,7 @@ public class MyTabu {
         //初始解
         TabuInitSolution initSolution = new TabuInitSolution(graph, flowList);
         TabuSolution init = initSolution.initSolution();
+        this.kTime = init.failIndex.size() * 2;
         TabuSolution result = search(init, init, 0);
         System.out.println("myTabu-best");
         System.out.println("myTabu-successRate" + result.successRate);
@@ -207,14 +215,17 @@ public class MyTabu {
 
     private List<List<Integer>> moveSuccessToFail(List<Integer> successIndex, List<Integer> failIndex) {
         Random random = new Random();
-        int moveIndex = Math.min(successIndex.size(), failIndex.size());
+        int moveIndex = Math.min(successIndex.size(), Math.max(failIndex.size(), 2));
         while (moveIndex > 0) {
             int index = random.nextInt(successIndex.size());
             failIndex.add(successIndex.get(index));
             successIndex.remove(index);
             moveIndex--;
         }
-        return permute(failIndex, 10);
+//        return permute(failIndex, 10);
+        List<List<Integer>> result = getRandomList(failIndex, this.kTime);
+//        result.add(successIndex);   //最后一个是successIndex
+        return result;
     }
 
     private class TabuNode {
@@ -239,6 +250,10 @@ public class MyTabu {
             TabuNode other = (TabuNode) obj;
             return Objects.equals(successIndex, other.successIndex)
                     && Objects.equals(failIndex, other.failIndex);
+        }
+        @Override
+        public int hashCode() {
+            return Objects.hash(successIndex, failIndex);
         }
     }
 }
