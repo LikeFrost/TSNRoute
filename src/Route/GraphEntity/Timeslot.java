@@ -6,6 +6,13 @@ public class Timeslot {
     public int startTime;
     public int duration;
 
+    public Timeslot() {
+    }
+    public Timeslot(int startTime, int duration) {
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

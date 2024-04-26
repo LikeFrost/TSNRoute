@@ -3,6 +3,7 @@ package Route.Utils;
 import Route.GraphEntity.*;
 import Route.RedundantPath;
 import Route.Utils.PathUtils.CutSetTheorem;
+import com.google.gson.Gson;
 
 import java.util.*;
 
@@ -325,4 +326,12 @@ public class NavigationUtil {
         }
         else return updatePathOF(flowList, slotUse);
     }
+
+    public static <T> T deepClone(T original){
+            Gson gson = new Gson();
+            String json = gson.toJson(original);
+            T copied = gson.fromJson(json, (Class<T>) original.getClass());
+            return copied;
+    }
+
 }

@@ -1,8 +1,6 @@
 package Route.ScheduleMethods;
 
-import Route.GraphEntity.Flow;
-import Route.GraphEntity.Link;
-import Route.GraphEntity.MyGraph;
+import Route.GraphEntity.*;
 import Route.ResultEntity.TabuSolution;
 import Route.Utils.NavigationUtil;
 import Route.Utils.PathUtils.TabuInitSolution;
@@ -26,35 +24,7 @@ public class MyTabu {
     public MyTabu() {
     }
 
-    public static List<List<Integer>> permute(List<Integer> nums, int limit) {
-        List<List<Integer>> permutations = new ArrayList<>();
-
-        if (nums.size() == 0) {
-            permutations.add(new ArrayList<>());
-            return permutations;
-        }
-
-        Collections.shuffle(nums); // 随机打乱数字列表顺序
-        Integer first = nums.get(0);
-        List<Integer> remaining = nums.subList(1, nums.size());
-        List<List<Integer>> subPermutations = permute(remaining, limit);
-
-        for (List<Integer> subPermutation : subPermutations) {
-            for (int i = 0; i <= subPermutation.size(); i++) {
-                List<Integer> permutation = new ArrayList<>(subPermutation);
-                permutation.add(i, first);
-                permutations.add(permutation);
-
-                if (permutations.size() == limit) {
-                    return permutations; // 达到限制，直接返回结果
-                }
-            }
-        }
-
-        return permutations;
-    }
-
-    public static List<List<Integer>> getRandomList(List<Integer> nums, int limit){
+    public static List<List<Integer>> getRandomList(List<Integer> nums, int limit) {
         List<List<Integer>> result = new ArrayList<>();
         for (int i = 0; i < limit; i++) {
             List<Integer> temp = new ArrayList<>(nums);
@@ -64,18 +34,16 @@ public class MyTabu {
         return result;
     }
 
-    private TabuSolution searchNeighbor(List<Integer> neighbor, List<Integer> successIndex, int[][][][][] solution) {
+    private TabuSolution searchNeighbor(List<Integer> neighbor, List<Integer> successIndex, List<List<List<LinkUse>>> solution) {
         //flow在链路上占据的时隙
-        int[][][][][] initSolution = solution;
+        List<List<List<LinkUse>>> initSolution = NavigationUtil.deepClone(solution);
         int[][][] linkSlotUse = new int[graph.point.length][graph.point.length][hyperPeriod];
         //根据当前解初始化linkSlotUse
-        for (int i = 0; i < initSolution.length; i++) {
-            for (int j = 0; j < initSolution[i].length; j++) {
-                for (int k = 0; k < initSolution[i][j].length; k++) {
-                    for (int l = 0; l < initSolution[i][j][k].length; l++) {
-                        for (int m = 0; m < initSolution[i][j][k][l].length; m++) {
-                            linkSlotUse[k][l][m] = Math.max(linkSlotUse[k][l][m], initSolution[i][j][k][l][m]);
-                        }
+        for (int i = 0; i < initSolution.size(); i++) {
+            for (int j = 0; j < initSolution.get(i).size(); j++) {
+                for (int k = 0; k < initSolution.get(i).get(j).size(); k++) {
+                    for (int d = initSolution.get(i).get(j).get(k).timeslot.startTime; d < initSolution.get(i).get(j).get(k).timeslot.startTime + flowList.get(i).duration; d++) {
+                        linkSlotUse[initSolution.get(i).get(j).get(k).srcNode][initSolution.get(i).get(j).get(k).dstNode][d] = 1;
                     }
                 }
             }
@@ -87,7 +55,7 @@ public class MyTabu {
             int index = neighbor.get(i);
             eachPath:
             for (int j = 0; j < flowList.get(index).redundantPath.size(); j++) {
-                int[][][][][] tempSolution = initSolution;
+                List<List<List<LinkUse>>> tempSolution = NavigationUtil.deepClone(initSolution);
                 int[][][] tempLinkSlotUse = linkSlotUse;
                 int groupFlag = 0;
                 for (int k = 0; k < flowList.get(index).redundantPath.get(j).redundantPath.size(); k++) {
@@ -106,8 +74,8 @@ public class MyTabu {
                                     } else {
                                         tempLinkSlotUse[linkPathList.get(l).srcNode][linkPathList.get(l).dstNode]
                                                 [(linkPathList.get(l).hops * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period] = 1;
-                                        tempSolution[index][k][linkPathList.get(l).srcNode][linkPathList.get(l).dstNode]
-                                                [(linkPathList.get(l).hops * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period] = 1;
+                                        tempSolution.get(i).get(k).add(new LinkUse(linkPathList.get(l).srcNode, linkPathList.get(l).dstNode,
+                                                new Timeslot((linkPathList.get(l).hops * flowList.get(i).duration + start + d) % hyperPeriod + p * flowList.get(i).period, flowList.get(i).duration)));
                                     }
                                 }
                             }
@@ -136,12 +104,14 @@ public class MyTabu {
     }
 
     public TabuSolution search(TabuSolution current, TabuSolution best, int times) {
+        System.out.println();
         System.out.println("myTabu-times" + times);
         System.out.println("myTabu-successIndex" + current.successIndex);
         System.out.println("myTabu-failIndex" + current.failIndex);
         System.out.println("myTabu-successRate" + current.successRate);
         System.out.println("myTabu-OF2" + current.OF2);
         System.out.println("myTabu-score" + current.score);
+
         if (times >= 1000 || times >= this.kTime * this.kTime) {
             return best;
         }
@@ -152,21 +122,9 @@ public class MyTabu {
         List<List<Integer>> neighbors = moveSuccessToFail(current.successIndex, current.failIndex);
 
         //将failIndex中的流调度清空
-        if(current.failIndex.size() > 0){
-            int length1 = current.solution[0].length;
-            int length2 = current.solution[0][0].length;
-            int length3 = current.solution[0][0][0].length;
-            int length4 = current.solution[0][0][0][0].length;
+        if (current.failIndex.size() > 0) {
             for (int i = 0; i < current.failIndex.size(); i++) {
-                for (int j = 0; j < length1; j++) {
-                    for (int k = 0; k < length2; k++) {
-                        for (int l = 0; l < length3; l++) {
-                            for (int m = 0; m < length4; m++) {
-                                current.solution[current.failIndex.get(i)][j][k][l][m] = 0;
-                            }
-                        }
-                    }
-                }
+                current.solution.get(current.failIndex.get(i)).clear();
             }
         }
 
@@ -198,12 +156,13 @@ public class MyTabu {
         return search(bestNeighbor, best, times + neighbors.size());
     }
 
-    public int[][][][][] schedule() throws Exception {
+    public List<List<List<LinkUse>>> schedule() throws Exception {
         //初始解
         TabuInitSolution initSolution = new TabuInitSolution(graph, flowList);
         TabuSolution init = initSolution.initSolution();
         this.kTime = init.failIndex.size() * 2;
         TabuSolution result = search(init, init, 0);
+        System.out.println();
         System.out.println("myTabu-best");
         System.out.println("myTabu-successRate" + result.successRate);
         System.out.println("myTabu-OF2" + result.OF2);
@@ -222,9 +181,7 @@ public class MyTabu {
             successIndex.remove(index);
             moveIndex--;
         }
-//        return permute(failIndex, 10);
         List<List<Integer>> result = getRandomList(failIndex, this.kTime);
-//        result.add(successIndex);   //最后一个是successIndex
         return result;
     }
 
@@ -251,6 +208,7 @@ public class MyTabu {
             return Objects.equals(successIndex, other.successIndex)
                     && Objects.equals(failIndex, other.failIndex);
         }
+
         @Override
         public int hashCode() {
             return Objects.hash(successIndex, failIndex);
