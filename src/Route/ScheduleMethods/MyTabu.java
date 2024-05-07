@@ -56,7 +56,7 @@ public class MyTabu {
             eachPath:
             for (int j = 0; j < flowList.get(index).redundantPath.size(); j++) {
                 List<List<List<LinkUse>>> tempSolution = NavigationUtil.deepClone(initSolution);
-                int[][][] tempLinkSlotUse = linkSlotUse;
+                int[][][] tempLinkSlotUse = NavigationUtil.deepCloneArr(linkSlotUse);
                 int groupFlag = 0;
                 for (int k = 0; k < flowList.get(index).redundantPath.get(j).redundantPath.size(); k++) {
                     List<Link> linkPathList = Link.getLinks(flowList.get(index).redundantPath.get(j).redundantPath.get(k));
@@ -68,14 +68,14 @@ public class MyTabu {
                             for (int d = 0; d < flowList.get(index).duration; d++) {
                                 for (int p = 0; p < hyperPeriod / flowList.get(index).period; p++) {
                                     if (tempLinkSlotUse[linkPathList.get(l).srcNode][linkPathList.get(l).dstNode]
-                                            [(linkPathList.get(l).hops * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period] == 1) {
+                                            [((linkPathList.get(l).hops - 1) * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period] == 1) {
                                         flag = false;
                                         break eachLink;
                                     } else {
                                         tempLinkSlotUse[linkPathList.get(l).srcNode][linkPathList.get(l).dstNode]
-                                                [(linkPathList.get(l).hops * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period] = 1;
-                                        tempSolution.get(i).get(k).add(new LinkUse(linkPathList.get(l).srcNode, linkPathList.get(l).dstNode,
-                                                new Timeslot((linkPathList.get(l).hops * flowList.get(i).duration + start + d) % hyperPeriod + p * flowList.get(i).period, flowList.get(i).duration)));
+                                                [((linkPathList.get(l).hops - 1) * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period] = 1;
+                                        tempSolution.get(index).get(k).add(new LinkUse(linkPathList.get(l).srcNode, linkPathList.get(l).dstNode,
+                                                new Timeslot(((linkPathList.get(l).hops - 1) * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period, flowList.get(index).duration)));
                                     }
                                 }
                             }
@@ -111,8 +111,7 @@ public class MyTabu {
         System.out.println("myTabu-successRate" + current.successRate);
         System.out.println("myTabu-OF2" + current.OF2);
         System.out.println("myTabu-score" + current.score);
-
-        if (times >= 1000 || times >= this.kTime * this.kTime) {
+        if (times >= 500 || times >= this.kTime * this.kTime) {
             return best;
         }
         if (best.successRate == 1) {
@@ -124,7 +123,11 @@ public class MyTabu {
         //将failIndex中的流调度清空
         if (current.failIndex.size() > 0) {
             for (int i = 0; i < current.failIndex.size(); i++) {
-                current.solution.get(current.failIndex.get(i)).clear();
+                int index = current.failIndex.get(i);
+                for (int j = 0; j < current.solution.get(index).size(); j++) {
+                    current.solution.get(index).set(j, new ArrayList<>());
+                }
+
             }
         }
 
@@ -159,22 +162,23 @@ public class MyTabu {
     public List<List<List<LinkUse>>> schedule() throws Exception {
         //初始解
         TabuInitSolution initSolution = new TabuInitSolution(graph, flowList);
+        System.out.println("开始进行禁忌搜索");
         TabuSolution init = initSolution.initSolution();
         this.kTime = init.failIndex.size() * 2;
         TabuSolution result = search(init, init, 0);
         System.out.println();
-        System.out.println("myTabu-best");
-        System.out.println("myTabu-successRate" + result.successRate);
-        System.out.println("myTabu-OF2" + result.OF2);
-        System.out.println("myTabu-score" + result.score);
-        System.out.println("myTabu-successIndex" + result.successIndex);
-        System.out.println("myTabu-failIndex" + result.failIndex);
+        System.out.println("myTabu-best ");
+        System.out.println("myTabu-successRate " + result.successRate);
+        System.out.println("myTabu-OF2 " + result.OF2);
+        System.out.println("myTabu-score " + result.score);
+        System.out.println("myTabu-successIndex " + result.successIndex);
+        System.out.println("myTabu-failIndex " + result.failIndex);
         return result.solution;
     }
 
     private List<List<Integer>> moveSuccessToFail(List<Integer> successIndex, List<Integer> failIndex) {
         Random random = new Random();
-        int moveIndex = Math.min(successIndex.size(), Math.max(failIndex.size(), 2));
+        int moveIndex = Math.min(successIndex.size(), failIndex.size());
         while (moveIndex > 0) {
             int index = random.nextInt(successIndex.size());
             failIndex.add(successIndex.get(index));

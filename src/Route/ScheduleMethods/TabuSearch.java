@@ -5,7 +5,10 @@ import Route.ResultEntity.TabuSolution;
 import Route.Utils.NavigationUtil;
 import Route.Utils.PathUtils.TabuInitSolution;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 
 public class TabuSearch {
     private MyGraph graph;
@@ -24,7 +27,6 @@ public class TabuSearch {
     }
 
     private TabuSolution searchNeighbor(List<Integer> neighbor, List<Integer> successIndex, List<List<List<LinkUse>>> solution) {
-        TabuSolution result = new TabuSolution();
         //flow在链路上占据的时隙
         List<List<List<LinkUse>>> initSolution = NavigationUtil.deepClone(solution);
         int[][][] linkSlotUse = new int[graph.point.length][graph.point.length][hyperPeriod];
@@ -46,7 +48,7 @@ public class TabuSearch {
             eachPath:
             for (int j = 0; j < flowList.get(index).redundantPath.size(); j++) {
                 List<List<List<LinkUse>>> tempSolution = NavigationUtil.deepClone(initSolution);
-                int[][][] tempLinkSlotUse = linkSlotUse;
+                int[][][] tempLinkSlotUse = NavigationUtil.deepCloneArr(linkSlotUse);
                 int groupFlag = 0;
                 for (int k = 0; k < flowList.get(index).redundantPath.get(j).redundantPath.size(); k++) {
                     List<Link> linkPathList = Link.getLinks(flowList.get(index).redundantPath.get(j).redundantPath.get(k));
@@ -58,14 +60,14 @@ public class TabuSearch {
                             for (int d = 0; d < flowList.get(index).duration; d++) {
                                 for (int p = 0; p < hyperPeriod / flowList.get(index).period; p++) {
                                     if (tempLinkSlotUse[linkPathList.get(l).srcNode][linkPathList.get(l).dstNode]
-                                            [(linkPathList.get(l).hops * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period] == 1) {
+                                            [((linkPathList.get(l).hops - 1) * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period] == 1) {
                                         flag = false;
                                         break eachLink;
                                     } else {
                                         tempLinkSlotUse[linkPathList.get(l).srcNode][linkPathList.get(l).dstNode]
-                                                [(linkPathList.get(l).hops * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period] = 1;
-                                        tempSolution.get(i).get(k).add(new LinkUse(linkPathList.get(l).srcNode, linkPathList.get(l).dstNode,
-                                                new Timeslot((linkPathList.get(l).hops * flowList.get(i).duration + start + d) % hyperPeriod + p * flowList.get(i).period, flowList.get(i).duration)));
+                                                [((linkPathList.get(l).hops - 1) * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period] = 1;
+                                        tempSolution.get(index).get(k).add(new LinkUse(linkPathList.get(l).srcNode, linkPathList.get(l).dstNode,
+                                                new Timeslot(((linkPathList.get(l).hops - 1) * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period, flowList.get(index).duration)));
                                     }
                                 }
                             }
@@ -88,20 +90,18 @@ public class TabuSearch {
                 }
             }
         }
-        result.successIndex = successIndex;
-        result.failIndex = failIndex;
-        result.solution = initSolution;
-        result.successRate = (double) successIndex.size() / (successIndex.size() + failIndex.size());
+        TabuSolution result = new TabuSolution(successIndex, failIndex, initSolution, (double) successIndex.size() / (successIndex.size() + failIndex.size()), NavigationUtil.calcOF2(graph, linkSlotUse));
+        flowList = NavigationUtil.updatePathOF(flowList, linkSlotUse);
         return result;
     }
 
     public TabuSolution search(TabuSolution current, TabuSolution best, int times) {
-        System.out.println("times" + times);
-        System.out.println("successIndex" + current.successIndex);
-        System.out.println("failIndex" + current.failIndex);
-        System.out.println("successRate" + current.successRate);
-        System.out.println("bestFail" + best.failIndex);
-        if (times >= 100) {
+//        System.out.println("times" + times);
+//        System.out.println("successIndex" + current.successIndex);
+//        System.out.println("failIndex" + current.failIndex);
+//        System.out.println("successRate" + current.successRate);
+//        System.out.println("bestFail" + best.failIndex);
+        if (times >= 1000) {
             return best;
         }
         if (best.successRate == 1) {
@@ -113,7 +113,10 @@ public class TabuSearch {
         //将failIndex中的流调度清空
         if (current.failIndex.size() > 0) {
             for (int i = 0; i < current.failIndex.size(); i++) {
-                current.solution.get(current.failIndex.get(i)).clear();
+                int index = current.failIndex.get(i);
+                for (int j = 0; j < current.solution.get(index).size(); j++) {
+                    current.solution.get(index).set(j, new ArrayList<>());
+                }
             }
         }
 
@@ -128,7 +131,7 @@ public class TabuSearch {
             } else {
                 tabuList.add(tabuNode);
             }
-                best = neighborSolution;
+            best = neighborSolution;
         }
         return search(neighborSolution, best, times + 1);
     }
@@ -136,12 +139,15 @@ public class TabuSearch {
     public List<List<List<LinkUse>>> schedule() throws Exception {
         //初始解
         TabuInitSolution initSolution = new TabuInitSolution(graph, flowList);
+        System.out.println("开始进行禁忌搜索");
         TabuSolution init = initSolution.initSolution();
         TabuSolution result = search(init, init, 0);
-        System.out.println("best");
-        System.out.println("successRate" + result.successRate);
-        System.out.println("successIndex" + result.successIndex);
-        System.out.println("failIndex" + result.failIndex);
+        System.out.println("TS-best ");
+        System.out.println("TS-successRate " + result.successRate);
+        System.out.println("TS-OF2 " + result.OF2);
+        System.out.println("TS-score " + result.score);
+        System.out.println("TS-successIndex " + result.successIndex);
+        System.out.println("TS-failIndex " + result.failIndex);
         return result.solution;
     }
 

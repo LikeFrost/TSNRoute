@@ -42,11 +42,14 @@ public class ScheduleWrapper {
 
         int[][][][] result = new int[newFlows.size()][graph.point.length][graph.point.length][hyperPeriod];
         IPL ipl = new IPL(graph, newFlows, newLinkPathList);
+        long begin = System.currentTimeMillis();
         try {
             result = ipl.schedule();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        long end = System.currentTimeMillis();
+        System.out.println("IPL算法耗时：" + (end - begin) + "ms");
 
         //转化为connections
         List<List<List<Connection>>> connections = new ArrayList<>();
@@ -73,62 +76,67 @@ public class ScheduleWrapper {
     public Map<String, Object> getTabuSearchSchedule() {
         List<List<List<LinkUse>>> result = new ArrayList<>();
         TabuSearch tabuSearch = new TabuSearch(graph, this.flows);
+        long begin = System.currentTimeMillis();
         try {
             result = tabuSearch.schedule();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //转化为connections
-//        List<List<List<Connection>>> connections = new ArrayList<>();
-//
-//        int successCount = 0;
-//        for (int i = 0; i < flows.size(); i++) {
-//            List<List<Connection>> connection = new ArrayList<>();
-//            int flag = 1;
-//            for (int j = 0; j < flows.get(i).redundantPath.get(flows.get(i).pathIndex).redundantPath.size(); j++) {
-//                List<Connection> temp = NavigationUtil.result2Connections(result[i][j]);
-//                if (temp.size() == 0) {
-//                    flag = 0;
-//                }
-//                connection.add(temp);
-//            }
-//            connections.add(connection);
-//            successCount += flag;
-//        }
+        long end = System.currentTimeMillis();
+        System.out.println("TS算法耗时：" + (end - begin) + "ms");
+        List<List<List<Connection>>> connections = new ArrayList<>();
+
+        int successCount = 0;
+        for (int i = 0; i < flows.size(); i++) {
+            List<List<Connection>> connection = new ArrayList<>();
+            int flag = 1;
+            for (int j = 0; j < flows.get(i).redundantPath.get(flows.get(i).pathIndex).redundantPath.size(); j++) {
+                List<Connection> temp = NavigationUtil.ts2Connections(result.get(i).get(j), this.hyperPeriod / flows.get(i).period);
+                if (temp.size() == 0) {
+                    flag = 0;
+                }
+                connection.add(temp);
+            }
+            connections.add(connection);
+            successCount += flag;
+        }
         Map<String, Object> scheduleResult = new HashMap<>();
-        scheduleResult.put("successRate", 1);
-        scheduleResult.put("connections", result);
+        scheduleResult.put("successRate", successCount / flows.size());
+        scheduleResult.put("connections", connections);
         return scheduleResult;
     }
 
     public Map<String, Object> getMyTabuSearchSchedule() {
         List<List<List<LinkUse>>> result = new ArrayList<>();
         MyTabu tabuSearch = new MyTabu(graph, this.flows);
+        long begin = System.currentTimeMillis();
         try {
             result = tabuSearch.schedule();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        long end = System.currentTimeMillis();
+        System.out.println("MyTS算法耗时：" + (end - begin) + "ms");
         //转化为connections
-//        List<List<List<Connection>>> connections = new ArrayList<>();
-//
-//        int successCount = 0;
-//        for (int i = 0; i < flows.size(); i++) {
-//            List<List<Connection>> connection = new ArrayList<>();
-//            int flag = 1;
-//            for (int j = 0; j < flows.get(i).redundantPath.get(flows.get(i).pathIndex).redundantPath.size(); j++) {
-//                List<Connection> temp = NavigationUtil.result2Connections(result[i][j]);
-//                if (temp.size() == 0) {
-//                    flag = 0;
-//                }
-//                connection.add(temp);
-//            }
-//            connections.add(connection);
-//            successCount += flag;
-//        }
+        List<List<List<Connection>>> connections = new ArrayList<>();
+
+        int successCount = 0;
+        for (int i = 0; i < flows.size(); i++) {
+            List<List<Connection>> connection = new ArrayList<>();
+            int flag = 1;
+            for (int j = 0; j < flows.get(i).redundantPath.get(flows.get(i).pathIndex).redundantPath.size(); j++) {
+                List<Connection> temp = NavigationUtil.ts2Connections(result.get(i).get(j), this.hyperPeriod / flows.get(i).period);
+                if (temp.size() == 0) {
+                    flag = 0;
+                }
+                connection.add(temp);
+            }
+            connections.add(connection);
+            successCount += flag;
+        }
         Map<String, Object> scheduleResult = new HashMap<>();
-        scheduleResult.put("successRate", 1);
-        scheduleResult.put("connections", result);
+        scheduleResult.put("successRate", successCount / flows.size());
+        scheduleResult.put("connections", connections);
         return scheduleResult;
     }
 
@@ -140,7 +148,7 @@ public class ScheduleWrapper {
         if (algorithm.equals("TS")) {
             return getTabuSearchSchedule();
         }
-        if(algorithm.equals("MyTS")){
+        if (algorithm.equals("MyTS")) {
             return getMyTabuSearchSchedule();
         }
         return null;

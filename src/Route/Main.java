@@ -2,7 +2,6 @@ package Route;
 
 import Route.GraphEntity.Flow;
 import Route.GraphEntity.MyGraph;
-import Route.Utils.NavigationUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -25,7 +24,8 @@ public class Main {
             Map<String, Object> data = gson.fromJson(reader, Map.class);
             reader.close();
             g = gson.fromJson(gson.toJson(data.get("graph")), MyGraph.class);
-            Type flowListType = new TypeToken<List<Flow>>(){}.getType();
+            Type flowListType = new TypeToken<List<Flow>>() {
+            }.getType();
             flowList = gson.fromJson(gson.toJson(data.get("flows")), flowListType);
             hyperPeriod = gson.fromJson(gson.toJson(data.get("hyperPeriod")), Integer.class);
         } catch (Exception e) {
@@ -64,14 +64,24 @@ public class Main {
         }
         init();
 
-        //整数线性规划
-//        ScheduleWrapper scheduleIPL = new ScheduleWrapper(g, flowList, "IPL", hyperPeriod);
-//        Map<String,Object> scheduleResultIPL = scheduleIPL.getSchedule();
-//        output(scheduleResultIPL, "IPL");
-
-        //禁忌搜索
-        ScheduleWrapper scheduleTS = new ScheduleWrapper(g, flowList, "MyTS", hyperPeriod);
-        Map<String, Object> scheduleResultTS = scheduleTS.getSchedule();
-        output(scheduleResultTS, "MyTS");
+        System.out.println("选择算法：0为整数线性规划，1为禁忌搜索，2为自定义禁忌搜索");
+        int choice = scanner.nextInt();
+        scanner.close();
+        if (choice == 0) {
+            //整数线性规划
+            ScheduleWrapper scheduleIPL = new ScheduleWrapper(g, flowList, "IPL", hyperPeriod);
+            Map<String, Object> scheduleResultIPL = scheduleIPL.getIPLSchedule();
+            output(scheduleResultIPL, "IPL");
+        } else if (choice == 1) {
+            //禁忌搜索
+            ScheduleWrapper scheduleTS = new ScheduleWrapper(g, flowList, "TS", hyperPeriod);
+            Map<String, Object> scheduleResultTS = scheduleTS.getTabuSearchSchedule();
+            output(scheduleResultTS, "TS");
+        } else if (choice == 2) {
+            //自定义禁忌搜索
+            ScheduleWrapper scheduleMyTS = new ScheduleWrapper(g, flowList, "MyTS", hyperPeriod);
+            Map<String, Object> scheduleResultMyTS = scheduleMyTS.getSchedule();
+            output(scheduleResultMyTS, "MyTS");
+        }
     }
 }

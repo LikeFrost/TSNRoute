@@ -3,7 +3,7 @@
     <output-path>$PROJECT_DIR$/out/artifacts/Route_jar</output-path>
     <root id="archive" name="Route.jar">
       <element id="directory" name="META-INF">
-        <element id="file-copy" path="$USER_HOME$/Desktop/META-INF/MANIFEST.MF" />
+        <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
       </element>
       <element id="module-output" name="Route" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../../../../../Apps/Java/gson-2.10.1.jar" path-in-jar="/" />

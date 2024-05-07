@@ -4,7 +4,9 @@ import Route.GraphEntity.*;
 import Route.RedundantPath;
 import Route.Utils.PathUtils.CutSetTheorem;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.*;
 
 import static java.lang.Math.sqrt;
@@ -221,6 +223,27 @@ public class NavigationUtil {
         return connections;
     }
 
+    //将禁忌搜索结果转化为connections
+    public static List<Connection> ts2Connections(List<LinkUse> result, int count) {
+        List<Connection> connections = new ArrayList<>();
+        List<Timeslot> timeslots = new ArrayList<>();
+        Connection connection = new Connection();
+        for (int i = 0; i < result.size(); i++) {
+            if (i % count == 0) {
+                connection.timeslot = timeslots;
+                connections.add(connection);
+                connection = new Connection();
+                timeslots = new ArrayList<>();
+                timeslots.add(result.get(i).timeslot);
+            } else {
+                connection.srcNodeId = String.valueOf(result.get(i).srcNode);
+                connection.dstNodeId = String.valueOf(result.get(i).dstNode);
+                timeslots.add(result.get(i).timeslot);
+            }
+        }
+        return connections;
+    }
+
     public static List<Flow> sortPathByScore(List<Flow> flowList, int e, int hyperPeriod) {
         double n = 0; //每组冗余路径的平均条数
         double _HC = e;
@@ -285,15 +308,15 @@ public class NavigationUtil {
         return flowList;
     }
 
-    public static double calcOF2(MyGraph myGraph, int[][][] slotUse){
+    public static double calcOF2(MyGraph myGraph, int[][][] slotUse) {
         int[][] pathUse = getPathUse(slotUse);
         double OF2 = 0; //方差
         double avg = 0;
-        for(Edge edge : myGraph.edge){
+        for (Edge edge : myGraph.edge) {
             avg += pathUse[edge.start][edge.end];
         }
         avg = avg / myGraph.edge.length;
-        for(Edge edge : myGraph.edge){
+        for (Edge edge : myGraph.edge) {
             OF2 += Math.pow(pathUse[edge.start][edge.end] - avg, 2);
         }
         OF2 = sqrt(OF2 / myGraph.edge.length);
@@ -301,7 +324,7 @@ public class NavigationUtil {
     }
 
     public static List<Flow> calcDoor(List<Flow> flowList, int hyperPeriod, int[][][] slotUse) {
-        if(!isUpdateOF){
+        if (!isUpdateOF) {
             if (totalDoor == 0) {
                 int count = 0;
                 for (Flow flow : flowList) {
@@ -323,15 +346,22 @@ public class NavigationUtil {
                 }
             }
             return flowList;
-        }
-        else return updatePathOF(flowList, slotUse);
+        } else return updatePathOF(flowList, slotUse);
     }
 
-    public static <T> T deepClone(T original){
-            Gson gson = new Gson();
-            String json = gson.toJson(original);
-            T copied = gson.fromJson(json, (Class<T>) original.getClass());
-            return copied;
+    public static <T> T deepClone(T original) {
+        Gson gson = new Gson();
+        String json = gson.toJson(original);
+        Type listType = new TypeToken<List<List<List<Route.GraphEntity.LinkUse>>>>() {
+        }.getType();
+        T copied = gson.fromJson(json, listType);
+        return copied;
     }
 
+    public static <T> T deepCloneArr(T original) {
+        Gson gson = new Gson();
+        String json = gson.toJson(original);
+        T copied = gson.fromJson(json, (Class<T>) original.getClass());
+        return copied;
+    }
 }
