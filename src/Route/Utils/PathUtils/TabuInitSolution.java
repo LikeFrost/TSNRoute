@@ -82,7 +82,7 @@ public class TabuInitSolution {
                 if (groupFlag == flowList.get(i).redundantPath.get(j).redundantPath.size()) {
                     initSolution.set(i, tempSolution);
                     linkSlotUse = tempLinkSlotUse;
-                    flowList.get(i).pathIndex = j;
+                    flowList.get(i).selectedPath = flowList.get(i).redundantPath.get(j);
                     successIndex.add(i);
                     break eachPath;
                 } else if (j == flowList.get(i).redundantPath.size() - 1) {

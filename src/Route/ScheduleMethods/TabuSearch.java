@@ -26,10 +26,11 @@ public class TabuSearch {
     public TabuSearch() {
     }
 
-    private TabuSolution searchNeighbor(List<Integer> neighbor, List<Integer> successIndex, List<List<List<LinkUse>>> solution) {
+    private TabuSolution searchNeighbor(List<Integer> neighbor, List<Integer> _successIndex, List<List<List<LinkUse>>> solution) {
         //flow在链路上占据的时隙
-        List<List<List<LinkUse>>> initSolution = NavigationUtil.deepClone(solution);
+        List<List<List<LinkUse>>> initSolution = NavigationUtil.deepCloneSolution(solution);
         int[][][] linkSlotUse = new int[graph.point.length][graph.point.length][hyperPeriod];
+        List<Integer> successIndex = new ArrayList<>(_successIndex);
         //根据当前解初始化linkSlotUse
         for (int i = 0; i < initSolution.size(); i++) {
             for (int j = 0; j < initSolution.get(i).size(); j++) {
@@ -47,7 +48,7 @@ public class TabuSearch {
             int index = neighbor.get(i);
             eachPath:
             for (int j = 0; j < flowList.get(index).redundantPath.size(); j++) {
-                List<List<List<LinkUse>>> tempSolution = NavigationUtil.deepClone(initSolution);
+                List<List<List<LinkUse>>> tempSolution = NavigationUtil.deepCloneSolution(initSolution);
                 int[][][] tempLinkSlotUse = NavigationUtil.deepCloneArr(linkSlotUse);
                 int groupFlag = 0;
                 for (int k = 0; k < flowList.get(index).redundantPath.get(j).redundantPath.size(); k++) {
@@ -82,7 +83,7 @@ public class TabuSearch {
                 if (groupFlag == flowList.get(index).redundantPath.get(j).redundantPath.size()) {
                     initSolution = tempSolution;
                     linkSlotUse = tempLinkSlotUse;
-                    flowList.get(index).pathIndex = j;
+                    flowList.get(index).selectedPath = flowList.get(index).redundantPath.get(j);
                     successIndex.add(index);
                     break eachPath;
                 } else if (j == flowList.get(index).redundantPath.size() - 1) {
@@ -96,12 +97,12 @@ public class TabuSearch {
     }
 
     public TabuSolution search(TabuSolution current, TabuSolution best, int times) {
-//        System.out.println("times" + times);
-//        System.out.println("successIndex" + current.successIndex);
-//        System.out.println("failIndex" + current.failIndex);
-//        System.out.println("successRate" + current.successRate);
-//        System.out.println("bestFail" + best.failIndex);
-        if (times >= 1000) {
+        System.out.println("times" + times);
+        System.out.println("successIndex" + current.successIndex);
+        System.out.println("failIndex" + current.failIndex);
+        System.out.println("successRate" + current.successRate);
+        System.out.println("bestFail" + best.failIndex);
+        if (times >= 200) {
             return best;
         }
         if (best.successRate == 1) {
@@ -131,7 +132,7 @@ public class TabuSearch {
             } else {
                 tabuList.add(tabuNode);
             }
-            best = neighborSolution;
+            best = new TabuSolution(neighborSolution.successIndex, neighborSolution.failIndex, neighborSolution.solution, neighborSolution.successRate, neighborSolution.OF2);
         }
         return search(neighborSolution, best, times + 1);
     }

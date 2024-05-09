@@ -352,6 +352,14 @@ public class NavigationUtil {
     public static <T> T deepClone(T original) {
         Gson gson = new Gson();
         String json = gson.toJson(original);
+        Type listType = new TypeToken<List<List<Route.GraphEntity.LinkUse>>>() {
+        }.getType();
+        T copied = gson.fromJson(json, listType);
+        return copied;
+    }
+    public static <T> T deepCloneSolution(T original) {
+        Gson gson = new Gson();
+        String json = gson.toJson(original);
         Type listType = new TypeToken<List<List<List<Route.GraphEntity.LinkUse>>>>() {
         }.getType();
         T copied = gson.fromJson(json, listType);

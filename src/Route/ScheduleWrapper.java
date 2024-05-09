@@ -90,12 +90,14 @@ public class ScheduleWrapper {
         for (int i = 0; i < flows.size(); i++) {
             List<List<Connection>> connection = new ArrayList<>();
             int flag = 1;
-            for (int j = 0; j < flows.get(i).redundantPath.get(flows.get(i).pathIndex).redundantPath.size(); j++) {
-                List<Connection> temp = NavigationUtil.ts2Connections(result.get(i).get(j), this.hyperPeriod / flows.get(i).period);
-                if (temp.size() == 0) {
-                    flag = 0;
+            if (flows.get(i).selectedPath != null) {
+                for (int j = 0; j < flows.get(i).selectedPath.redundantPath.size(); j++) {
+                    List<Connection> temp = NavigationUtil.ts2Connections(result.get(i).get(j), this.hyperPeriod / flows.get(i).period);
+                    if (temp.size() == 0) {
+                        flag = 0;
+                    }
+                    connection.add(temp);
                 }
-                connection.add(temp);
             }
             connections.add(connection);
             successCount += flag;
@@ -124,12 +126,14 @@ public class ScheduleWrapper {
         for (int i = 0; i < flows.size(); i++) {
             List<List<Connection>> connection = new ArrayList<>();
             int flag = 1;
-            for (int j = 0; j < flows.get(i).redundantPath.get(flows.get(i).pathIndex).redundantPath.size(); j++) {
-                List<Connection> temp = NavigationUtil.ts2Connections(result.get(i).get(j), this.hyperPeriod / flows.get(i).period);
-                if (temp.size() == 0) {
-                    flag = 0;
+            if (flows.get(i).selectedPath != null) {
+                for (int j = 0; j < flows.get(i).selectedPath.redundantPath.size(); j++) {
+                    List<Connection> temp = NavigationUtil.ts2Connections(result.get(i).get(j), this.hyperPeriod / flows.get(i).period);
+                    if (temp.size() == 0) {
+                        flag = 0;
+                    }
+                    connection.add(temp);
                 }
-                connection.add(temp);
             }
             connections.add(connection);
             successCount += flag;

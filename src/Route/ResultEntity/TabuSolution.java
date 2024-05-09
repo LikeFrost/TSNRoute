@@ -21,7 +21,7 @@ public class TabuSolution {
         this.failIndex = new ArrayList<>(failIndex);
 
         // 对于多维数组，需要手动复制每一层
-        this.solution = NavigationUtil.deepClone(solution);
+        this.solution = NavigationUtil.deepCloneSolution(solution);
 
         this.successRate = successRate;
         this.OF2 = OF2;
