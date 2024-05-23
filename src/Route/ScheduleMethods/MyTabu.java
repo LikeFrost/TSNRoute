@@ -114,7 +114,7 @@ public class MyTabu {
         System.out.println("myTabu-successRate" + current.successRate);
         System.out.println("myTabu-OF2" + current.OF2);
         System.out.println("myTabu-score" + current.score);
-        if (times >= 200 || times >= this.kTime * this.kTime) {
+        if (times >= 100) {
             return best;
         }
         if (best.successRate == 1) {
@@ -168,7 +168,7 @@ public class MyTabu {
         TabuInitSolution initSolution = new TabuInitSolution(graph, flowList);
         System.out.println("开始进行禁忌搜索");
         TabuSolution init = initSolution.initSolution();
-        this.kTime = 10;
+        this.kTime = 5;
         TabuSolution result = search(init, init, 0);
         System.out.println();
         System.out.println("myTabu-best ");

@@ -130,7 +130,8 @@ public class NavigationUtil {
         for (int i = 0; i < count; i++) {
             int[] points = generateRandomNumbers(min, max);
             List<RedundantPath> redundantPath = new ArrayList<>();
-            flowList.add(new Flow(points[0], points[1], 1000, 1, generateRandomIntNumber(1, 4) * 100, generateRandomDoubleNumber(minReliability, maxReliability), redundantPath));
+            CountPath countPath = new CountPath();
+            flowList.add(new Flow(points[0], points[1], 1000, 1, generateRandomIntNumber(1, 4) * 100, generateRandomDoubleNumber(minReliability, maxReliability), redundantPath, countPath));
         }
         return flowList;
     }
@@ -291,7 +292,7 @@ public class NavigationUtil {
         return pathUse;
     }
 
-    public static List<Flow> updatePathOF(List<Flow> flowList, int[][][] slotUse) {
+    public static List<Flow> updatePathOF(List<Flow> flowList, int[][][] slotUse, int hyperPeriod) {
         int[][] pathUse = getPathUse(slotUse);
 
         for (Flow flow : flowList) {
@@ -305,6 +306,7 @@ public class NavigationUtil {
                 }
             }
         }
+        sortPathByScore(flowList, 106, hyperPeriod);
         return flowList;
     }
 
@@ -341,12 +343,12 @@ public class NavigationUtil {
                 for (int j = i + i; j < pathUse[0].length; j++) {
                     if (totalDoor - pathUse[i][j] <= 0) {
                         isUpdateOF = true;
-                        return updatePathOF(flowList, slotUse);
+                        return updatePathOF(flowList, slotUse, hyperPeriod);
                     }
                 }
             }
             return flowList;
-        } else return updatePathOF(flowList, slotUse);
+        } else return updatePathOF(flowList, slotUse, hyperPeriod);
     }
 
     public static <T> T deepClone(T original) {
@@ -357,6 +359,7 @@ public class NavigationUtil {
         T copied = gson.fromJson(json, listType);
         return copied;
     }
+
     public static <T> T deepCloneSolution(T original) {
         Gson gson = new Gson();
         String json = gson.toJson(original);

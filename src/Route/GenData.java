@@ -2,6 +2,7 @@ package Route;
 
 import Route.GraphEntity.Flow;
 import Route.GraphEntity.MyGraph;
+import Route.Utils.CountPath;
 import Route.Utils.NavigationUtil;
 import com.google.gson.Gson;
 
@@ -14,7 +15,7 @@ public class GenData {
     static List<Flow> flowList = new ArrayList<>();
     static int hyperPeriod = 0;
 
-    public static void genData(){
+    public static void genData() {
         int n = 45, e = 106;
         double data[][] = {{0, 13}, {0, 14}, {0, 15}, {0, 4}, {0, 5},
                 {1, 16}, {1, 17}, {1, 4}, {1, 5},
@@ -55,12 +56,13 @@ public class GenData {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Please enter the flow count:");
         int flowCount = scanner.nextInt();
-        flowList = NavigationUtil.generateFlow(flowCount, 13, 43, 0.999, 0.99999);
+        flowList = NavigationUtil.generateFlow(flowCount, 13, 43, 0.999, 0.999999);
 
         int redundantPathNum = 5;  //冗余路径数
         //计算流的冗余路径
         for (Flow flow : flowList) {
             flow.redundantPath = new RedundantPath().getRedundantPath(g, flow.start, flow.end, 5, redundantPathNum, flow.reliability);
+            flow.countPath = new CountPath().getCountPath(g, flow.start, flow.end, 2);
         }
         hyperPeriod = NavigationUtil.getHyperPeriod(flowList);  //超周期
         System.out.println("Graph and flow and path generation completed.");
@@ -70,7 +72,7 @@ public class GenData {
 
     public static void output() {
         try {
-            FileWriter writer = new FileWriter( "initialData.json");
+            FileWriter writer = new FileWriter("initialData.json");
             Gson gson = new Gson();
             Map<String, Object> map = new HashMap<>();
             map.put("graph", g);

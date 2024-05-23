@@ -3,6 +3,7 @@ package Route.ScheduleMethods;
 import Route.GraphEntity.*;
 import Route.ResultEntity.TabuSolution;
 import Route.Utils.NavigationUtil;
+import Route.Utils.PathUtils.TabuCountInitSolution;
 import Route.Utils.PathUtils.TabuInitSolution;
 
 import java.util.ArrayList;
@@ -46,53 +47,49 @@ public class TabuSearch {
 
         for (int i = 0; i < neighbor.size(); i++) {
             int index = neighbor.get(i);
-            eachPath:
-            for (int j = 0; j < flowList.get(index).redundantPath.size(); j++) {
-                List<List<List<LinkUse>>> tempSolution = NavigationUtil.deepCloneSolution(initSolution);
-                int[][][] tempLinkSlotUse = NavigationUtil.deepCloneArr(linkSlotUse);
-                int groupFlag = 0;
-                for (int k = 0; k < flowList.get(index).redundantPath.get(j).redundantPath.size(); k++) {
-                    List<Link> linkPathList = Link.getLinks(flowList.get(index).redundantPath.get(j).redundantPath.get(k));
-                    eachStart:
-                    for (int start = 0; start < flowList.get(index).period - flowList.get(index).duration * linkPathList.size(); start++) {
-                        boolean flag = true;
-                        eachLink:
-                        for (int l = 0; l < linkPathList.size(); l++) {
-                            for (int d = 0; d < flowList.get(index).duration; d++) {
-                                for (int p = 0; p < hyperPeriod / flowList.get(index).period; p++) {
-                                    if (tempLinkSlotUse[linkPathList.get(l).srcNode][linkPathList.get(l).dstNode]
-                                            [((linkPathList.get(l).hops - 1) * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period] == 1) {
-                                        flag = false;
-                                        break eachLink;
-                                    } else {
-                                        tempLinkSlotUse[linkPathList.get(l).srcNode][linkPathList.get(l).dstNode]
-                                                [((linkPathList.get(l).hops - 1) * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period] = 1;
-                                        tempSolution.get(index).get(k).add(new LinkUse(linkPathList.get(l).srcNode, linkPathList.get(l).dstNode,
-                                                new Timeslot(((linkPathList.get(l).hops - 1) * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period, flowList.get(index).duration)));
-                                    }
+//            eachPath:
+//            for (int j = 0; j < flowList.get(index).redundantPath.size(); j++) {
+            List<List<List<LinkUse>>> tempSolution = NavigationUtil.deepCloneSolution(initSolution);
+            int[][][] tempLinkSlotUse = NavigationUtil.deepCloneArr(linkSlotUse);
+            int groupFlag = 0;
+            for (int k = 0; k < flowList.get(index).countPath.redundantPath.size(); k++) {
+                List<Link> linkPathList = Link.getLinks(flowList.get(index).countPath.redundantPath.get(k));
+                eachStart:
+                for (int start = 0; start < flowList.get(index).period - flowList.get(index).duration * linkPathList.size(); start++) {
+                    boolean flag = true;
+                    eachLink:
+                    for (int l = 0; l < linkPathList.size(); l++) {
+                        for (int d = 0; d < flowList.get(index).duration; d++) {
+                            for (int p = 0; p < hyperPeriod / flowList.get(index).period; p++) {
+                                if (tempLinkSlotUse[linkPathList.get(l).srcNode][linkPathList.get(l).dstNode]
+                                        [((linkPathList.get(l).hops - 1) * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period] == 1) {
+                                    flag = false;
+                                    break eachLink;
+                                } else {
+                                    tempLinkSlotUse[linkPathList.get(l).srcNode][linkPathList.get(l).dstNode]
+                                            [((linkPathList.get(l).hops - 1) * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period] = 1;
+                                    tempSolution.get(index).get(k).add(new LinkUse(linkPathList.get(l).srcNode, linkPathList.get(l).dstNode,
+                                            new Timeslot(((linkPathList.get(l).hops - 1) * flowList.get(index).duration + start + d) % hyperPeriod + p * flowList.get(index).period, flowList.get(index).duration)));
                                 }
                             }
+                        }
 
-                        }
-                        if (flag) {
-                            groupFlag++;
-                            break eachStart;
-                        }
+                    }
+                    if (flag) {
+                        groupFlag++;
+                        break eachStart;
                     }
                 }
-                if (groupFlag == flowList.get(index).redundantPath.get(j).redundantPath.size()) {
-                    initSolution = tempSolution;
-                    linkSlotUse = tempLinkSlotUse;
-                    flowList.get(index).selectedPath = flowList.get(index).redundantPath.get(j);
-                    successIndex.add(index);
-                    break eachPath;
-                } else if (j == flowList.get(index).redundantPath.size() - 1) {
-                    failIndex.add(index);
-                }
+            }
+            if (groupFlag == flowList.get(index).countPath.redundantPath.size()) {
+                initSolution = tempSolution;
+                linkSlotUse = tempLinkSlotUse;
+                successIndex.add(index);
+            } else {
+                failIndex.add(index);
             }
         }
         TabuSolution result = new TabuSolution(successIndex, failIndex, initSolution, (double) successIndex.size() / (successIndex.size() + failIndex.size()), NavigationUtil.calcOF2(graph, linkSlotUse));
-        flowList = NavigationUtil.updatePathOF(flowList, linkSlotUse);
         return result;
     }
 
@@ -102,7 +99,7 @@ public class TabuSearch {
         System.out.println("failIndex" + current.failIndex);
         System.out.println("successRate" + current.successRate);
         System.out.println("bestFail" + best.failIndex);
-        if (times >= 200) {
+        if (times >= 100) {
             return best;
         }
         if (best.successRate == 1) {
@@ -139,7 +136,7 @@ public class TabuSearch {
 
     public List<List<List<LinkUse>>> schedule() throws Exception {
         //初始解
-        TabuInitSolution initSolution = new TabuInitSolution(graph, flowList);
+        TabuCountInitSolution initSolution = new TabuCountInitSolution(graph, flowList);
         System.out.println("开始进行禁忌搜索");
         TabuSolution init = initSolution.initSolution();
         TabuSolution result = search(init, init, 0);

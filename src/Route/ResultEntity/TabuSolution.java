@@ -33,7 +33,7 @@ public class TabuSolution {
 
     public void calcScore() {
         double k1 = 1;
-        double k2 = 1;
+        double k2 = 1/250;
         this.score = k1 * this.successRate + k2 * 1 / (1 + this.OF2);
     }
 

@@ -87,11 +87,12 @@ public class ScheduleWrapper {
         List<List<List<Connection>>> connections = new ArrayList<>();
 
         int successCount = 0;
+        int reliableFlowCount = 0;
         for (int i = 0; i < flows.size(); i++) {
             List<List<Connection>> connection = new ArrayList<>();
             int flag = 1;
-            if (flows.get(i).selectedPath != null) {
-                for (int j = 0; j < flows.get(i).selectedPath.redundantPath.size(); j++) {
+            if (flows.get(i).countPath != null) {
+                for (int j = 0; j < flows.get(i).countPath.redundantPath.size(); j++) {
                     List<Connection> temp = NavigationUtil.ts2Connections(result.get(i).get(j), this.hyperPeriod / flows.get(i).period);
                     if (temp.size() == 0) {
                         flag = 0;
@@ -99,12 +100,16 @@ public class ScheduleWrapper {
                     connection.add(temp);
                 }
             }
+            if (flag == 1 && flows.get(i).countPath.redundantPathReliability > 0.99999) {
+                reliableFlowCount++;
+            }
             connections.add(connection);
             successCount += flag;
         }
         Map<String, Object> scheduleResult = new HashMap<>();
         scheduleResult.put("successRate", successCount / flows.size());
         scheduleResult.put("connections", connections);
+        scheduleResult.put("reliableFlowRate", (double) reliableFlowCount / successCount);
         return scheduleResult;
     }
 
@@ -141,6 +146,7 @@ public class ScheduleWrapper {
         Map<String, Object> scheduleResult = new HashMap<>();
         scheduleResult.put("successRate", successCount / flows.size());
         scheduleResult.put("connections", connections);
+        scheduleResult.put("reliableFlowRate", 1);
         return scheduleResult;
     }
 
