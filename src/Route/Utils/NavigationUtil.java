@@ -102,6 +102,13 @@ public class NavigationUtil {
         return randomNumber;
     }
 
+    public static int generateRandomHyperPeriod(int min, int max) {
+        int[] list = {100, 200, 400, 800};
+        Random random = new Random();
+        int randomNumber = random.nextInt(max - min) + min;
+        return list[randomNumber];
+    }
+
     public static int generateRandomIntNumber(int min, int max) {
         Random random = new Random();
         int randomNumber = random.nextInt(max - min) + min;
@@ -125,13 +132,14 @@ public class NavigationUtil {
         return result;
     }
 
-    public static List<Flow> generateFlow(int count, int min, int max, double minReliability, double maxReliability) {
+    public static List<Flow> generateFlow(int count, int min, int max, double[] needReliability) {
         List<Flow> flowList = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             int[] points = generateRandomNumbers(min, max);
             List<RedundantPath> redundantPath = new ArrayList<>();
             CountPath countPath = new CountPath();
-            flowList.add(new Flow(points[0], points[1], 1000, 1, generateRandomIntNumber(1, 4) * 100, generateRandomDoubleNumber(minReliability, maxReliability), redundantPath, countPath));
+            flowList.add(new Flow(points[0], points[1], 1000, 1, generateRandomHyperPeriod(0, 4), needReliability[generateRandomIntNumber(0, 4)], redundantPath, countPath));
+//            flowList.add(new Flow(points[0], points[1], 1000, 1, generateRandomIntNumber(0, 3), GlobalVariable.needReliability, redundantPath, countPath));
         }
         return flowList;
     }
@@ -266,6 +274,13 @@ public class NavigationUtil {
             Collections.sort(flow.redundantPath, new Comparator<RedundantPath>() {
                 @Override
                 public int compare(RedundantPath o1, RedundantPath o2) {
+                    // 首先比较of字段
+                    int ofCompare = Integer.compare(o1.CO, o2.CO);
+                    if (ofCompare != 0) {
+                        // 如果of不相同，直接返回比较结果
+                        return ofCompare;
+                    }
+                    // 如果of相同，再比较WT，但要求WT是从大到小排序，因此比较顺序是o2.WT和o1.WT
                     return Double.compare(o2.WT, o1.WT);
                 }
             });
@@ -315,13 +330,17 @@ public class NavigationUtil {
         double OF2 = 0; //方差
         double avg = 0;
         for (Edge edge : myGraph.edge) {
-            avg += pathUse[edge.start][edge.end];
+            if (edge.start <= 12 && edge.end <= 12) {
+                avg += pathUse[edge.start][edge.end];
+            }
         }
-        avg = avg / myGraph.edge.length;
+        avg = avg / 22;
         for (Edge edge : myGraph.edge) {
-            OF2 += Math.pow(pathUse[edge.start][edge.end] - avg, 2);
+            if (edge.start <= 12 && edge.end <= 12) {
+                OF2 += Math.pow(pathUse[edge.start][edge.end] - avg, 2);
+            }
         }
-        OF2 = sqrt(OF2 / myGraph.edge.length);
+        OF2 = sqrt(OF2 / 22);
         return OF2;
     }
 
@@ -374,5 +393,29 @@ public class NavigationUtil {
         String json = gson.toJson(original);
         T copied = gson.fromJson(json, (Class<T>) original.getClass());
         return copied;
+    }
+
+    public static List<Flow> sortFlowByPathCount(List<Flow> flowList) {
+        Collections.sort(flowList, new Comparator<Flow>() {
+            @Override
+            public int compare(Flow o1, Flow o2) {
+                int p1 = 0;
+                int p2 = 0;
+                for (RedundantPath redundantPath : o1.redundantPath) {
+                    for (int i = 0; i < redundantPath.redundantPath.size(); i++) {
+                        p1 += redundantPath.redundantPath.get(i).path.size();
+                    }
+                }
+                p1 = p1 / o1.redundantPath.size();
+                for (RedundantPath redundantPath : o2.redundantPath) {
+                    for (int i = 0; i < redundantPath.redundantPath.size(); i++) {
+                        p2 += redundantPath.redundantPath.get(i).path.size();
+                    }
+                }
+                p2 = p2 / o2.redundantPath.size();
+                return p1 - p2;
+            }
+        });
+        return flowList;
     }
 }

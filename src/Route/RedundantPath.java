@@ -2,6 +2,7 @@ package Route;
 
 import Route.GraphEntity.MyGraph;
 import Route.GraphEntity.MyPath;
+import Route.Utils.GlobalVariable;
 import Route.Utils.PathUtils.GenerateRedundantPath;
 import Route.Utils.PathUtils.ShortestPath;
 
@@ -42,6 +43,9 @@ public class RedundantPath {
 
     public List<RedundantPath> getRedundantPath(MyGraph g, int startIndex, int endIndex, int pathCount, int targetCombinationCount, double reliabilityThreshold) {
         List<MyPath> path = ShortestPath.KSP_Yen(g, startIndex, endIndex, pathCount);
+        if(path.get(0).pathEdge.size() >= 5) {
+            reliabilityThreshold = GlobalVariable.needReliability[2];
+        }
         List<RedundantPath> combinations = GenerateRedundantPath.generateRedundantPath(g, path, targetCombinationCount, reliabilityThreshold);
         return combinations;
     }

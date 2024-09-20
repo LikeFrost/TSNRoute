@@ -11,6 +11,7 @@ import java.util.List;
 public class GenerateRedundantPath {
 
     public static List<RedundantPath> generateRedundantPath(MyGraph g, List<MyPath> path, int targetCombinationCount, double reliabilityThreshold){
+        System.out.println("generateRedundantPath"+path+" "+reliabilityThreshold);
         List<RedundantPath> selectedCombinations = new ArrayList<>();
         int combinationCount = 0;
 

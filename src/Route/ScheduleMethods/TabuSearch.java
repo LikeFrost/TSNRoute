@@ -154,7 +154,7 @@ public class TabuSearch {
         int moveIndex = Math.min(successIndex.size(), failIndex.size());
         while (moveIndex > 0) {
             int index = random.nextInt(successIndex.size());
-            failIndex.add(successIndex.get(index));
+            failIndex.add(0, successIndex.get(index));
             successIndex.remove(index);
             moveIndex--;
         }

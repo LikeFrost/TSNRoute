@@ -66,6 +66,8 @@ public class TabuInitSolution {
                                     } else {
                                         tempLinkSlotUse[linkPathList.get(l).srcNode][linkPathList.get(l).dstNode]
                                                 [((linkPathList.get(l).hops - 1) * flowList.get(i).duration + start + d) % hyperPeriod + p * flowList.get(i).period] = 1;
+                                        if(tempSolution.size() <= k)
+                                            tempSolution.add(new ArrayList<>());
                                         tempSolution.get(k).add(new LinkUse(linkPathList.get(l).srcNode, linkPathList.get(l).dstNode,
                                                 new Timeslot(((linkPathList.get(l).hops - 1) * flowList.get(i).duration + start + d) % hyperPeriod + p * flowList.get(i).period, flowList.get(i).duration)));
                                     }

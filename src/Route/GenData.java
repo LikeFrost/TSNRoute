@@ -3,6 +3,7 @@ package Route;
 import Route.GraphEntity.Flow;
 import Route.GraphEntity.MyGraph;
 import Route.Utils.CountPath;
+import Route.Utils.GlobalVariable;
 import Route.Utils.NavigationUtil;
 import com.google.gson.Gson;
 
@@ -47,7 +48,7 @@ public class GenData {
         //边集
         List<List<Double>> edgeList = NavigationUtil.arrayToList(data);
         for (List<Double> sublist : edgeList) {
-            sublist.add(NavigationUtil.generateRandomDoubleNumber(0.999, 0.99999));
+            sublist.add(GlobalVariable.pathReliability);
         }
         //图
         g = new MyGraph(n, e);
@@ -56,14 +57,17 @@ public class GenData {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Please enter the flow count:");
         int flowCount = scanner.nextInt();
-        flowList = NavigationUtil.generateFlow(flowCount, 13, 43, 0.999, 0.999999);
+        //在内部函数中已经修改了需要的可靠度
+        flowList = NavigationUtil.generateFlow(flowCount, 13, 43, GlobalVariable.needReliability);
 
         int redundantPathNum = 5;  //冗余路径数
         //计算流的冗余路径
         for (Flow flow : flowList) {
-            flow.redundantPath = new RedundantPath().getRedundantPath(g, flow.start, flow.end, 5, redundantPathNum, flow.reliability);
-            flow.countPath = new CountPath().getCountPath(g, flow.start, flow.end, 2);
+            flow.redundantPath = new RedundantPath().getRedundantPath(g, flow.start, flow.end, 4, redundantPathNum, flow.reliability);
+            flow.countPath = new CountPath().getCountPath(g, flow.start, flow.end, GlobalVariable.pathCount);
         }
+        flowList = NavigationUtil.sortFlowByPathCount(flowList);
+        System.out.println(flowList);
         hyperPeriod = NavigationUtil.getHyperPeriod(flowList);  //超周期
         System.out.println("Graph and flow and path generation completed.");
         NavigationUtil.sortPathByScore(flowList, e, hyperPeriod);

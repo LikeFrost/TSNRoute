@@ -3,6 +3,7 @@ package Route;
 import Route.GraphEntity.*;
 import Route.ScheduleMethods.IPL;
 import Route.ScheduleMethods.MyTabu;
+import Route.ScheduleMethods.OpTabu;
 import Route.ScheduleMethods.TabuSearch;
 import Route.Utils.NavigationUtil;
 
@@ -100,7 +101,7 @@ public class ScheduleWrapper {
                     connection.add(temp);
                 }
             }
-            if (flag == 1 && flows.get(i).countPath.redundantPathReliability > 0.99999) {
+            if (flag == 1 && flows.get(i).countPath.redundantPathReliability >= flows.get(i).reliability) {
                 reliableFlowCount++;
             }
             connections.add(connection);
@@ -109,12 +110,14 @@ public class ScheduleWrapper {
         Map<String, Object> scheduleResult = new HashMap<>();
         scheduleResult.put("successRate", successCount / flows.size());
         scheduleResult.put("connections", connections);
-        scheduleResult.put("reliableFlowRate", (double) reliableFlowCount / successCount);
+        scheduleResult.put("reliableFlowRate", (double) reliableFlowCount / flows.size());
+        System.out.println("reliableFlowRate: " + (double) reliableFlowCount / flows.size());
         return scheduleResult;
     }
 
     public Map<String, Object> getMyTabuSearchSchedule() {
         List<List<List<LinkUse>>> result = new ArrayList<>();
+
         MyTabu tabuSearch = new MyTabu(graph, this.flows);
         long begin = System.currentTimeMillis();
         try {
@@ -126,6 +129,7 @@ public class ScheduleWrapper {
         System.out.println("MyTS算法耗时：" + (end - begin) + "ms");
         //转化为connections
         List<List<List<Connection>>> connections = new ArrayList<>();
+        int reliableFlowCount = 0;
 
         int successCount = 0;
         for (int i = 0; i < flows.size(); i++) {
@@ -140,13 +144,60 @@ public class ScheduleWrapper {
                     connection.add(temp);
                 }
             }
+            if (flag == 1 && flows.get(i).countPath.redundantPathReliability >= flows.get(i).reliability) {
+                reliableFlowCount++;
+            }
             connections.add(connection);
             successCount += flag;
         }
         Map<String, Object> scheduleResult = new HashMap<>();
         scheduleResult.put("successRate", successCount / flows.size());
         scheduleResult.put("connections", connections);
-        scheduleResult.put("reliableFlowRate", 1);
+        scheduleResult.put("reliableFlowRate", (double) reliableFlowCount / flows.size());
+        System.out.println("reliableFlowRate: " + (double) reliableFlowCount / flows.size());
+        return scheduleResult;
+    }
+
+    public Map<String, Object> getOpTabuSearchSchedule() {
+        List<List<List<LinkUse>>> result = new ArrayList<>();
+
+        OpTabu tabuSearch = new OpTabu(graph, this.flows);
+        long begin = System.currentTimeMillis();
+        try {
+            result = tabuSearch.schedule();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("OPTS算法耗时：" + (end - begin) + "ms");
+        //转化为connections
+        List<List<List<Connection>>> connections = new ArrayList<>();
+        int reliableFlowCount = 0;
+
+        int successCount = 0;
+        for (int i = 0; i < flows.size(); i++) {
+            List<List<Connection>> connection = new ArrayList<>();
+            int flag = 1;
+            if (flows.get(i).selectedPath != null) {
+                for (int j = 0; j < flows.get(i).selectedPath.redundantPath.size(); j++) {
+                    List<Connection> temp = NavigationUtil.ts2Connections(result.get(i).get(j), this.hyperPeriod / flows.get(i).period);
+                    if (temp.size() == 0) {
+                        flag = 0;
+                    }
+                    connection.add(temp);
+                }
+            }
+            if (flag == 1 && flows.get(i).countPath.redundantPathReliability >= flows.get(i).reliability) {
+                reliableFlowCount++;
+            }
+            connections.add(connection);
+            successCount += flag;
+        }
+        Map<String, Object> scheduleResult = new HashMap<>();
+        scheduleResult.put("successRate", successCount / flows.size());
+        scheduleResult.put("connections", connections);
+        scheduleResult.put("reliableFlowRate", (double) reliableFlowCount / flows.size());
+        System.out.println("reliableFlowRate: " + (double) reliableFlowCount / flows.size());
         return scheduleResult;
     }
 
@@ -160,6 +211,9 @@ public class ScheduleWrapper {
         }
         if (algorithm.equals("MyTS")) {
             return getMyTabuSearchSchedule();
+        }
+        if (algorithm.equals("OpTS")) {
+            return getOpTabuSearchSchedule();
         }
         return null;
     }

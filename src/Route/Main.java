@@ -64,7 +64,7 @@ public class Main {
         }
         init();
 
-        System.out.println("选择算法：0为整数线性规划，1为禁忌搜索，2为自定义禁忌搜索");
+        System.out.println("选择算法：0为整数线性规划，1为禁忌搜索，2为自定义禁忌搜索，3为不加负载均衡禁忌搜索");
         int choice = scanner.nextInt();
         scanner.close();
         if (choice == 0) {
@@ -82,6 +82,11 @@ public class Main {
             ScheduleWrapper scheduleMyTS = new ScheduleWrapper(g, flowList, "MyTS", hyperPeriod);
             Map<String, Object> scheduleResultMyTS = scheduleMyTS.getSchedule();
             output(scheduleResultMyTS, "MyTS");
+        } else if (choice == 3) {
+            //自定义禁忌搜索
+            ScheduleWrapper scheduleOpTS = new ScheduleWrapper(g, flowList, "OpTS", hyperPeriod);
+            Map<String, Object> scheduleResultOpTS = scheduleOpTS.getSchedule();
+            output(scheduleResultOpTS, "OpTS");
         }
     }
 }
